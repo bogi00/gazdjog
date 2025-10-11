@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Gazdjog gyakorló teszt</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#111827; --muted:#9ca3af; --ok:#10b981; --err:#ef4444; --pri:#60a5fa;
+    --ink:#e5e7eb; --ink2:#cbd5e1; --chip:#1f2937;
+  }
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+  .wrap{max-width:980px;margin:24px auto;padding:0 16px}
+  .card{background:var(--card);border:1px solid #1f2937;border-radius:14px;padding:18px 18px 8px 18px;box-shadow:0 10px 30px rgba(0,0,0,.25);margin-bottom:18px}
+  .h1{font-size:26px;font-weight:800;margin:2px 0 14px}
+  .h2{font-size:18px;color:var(--ink2);margin:0 0 10px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .btn{appearance:none;border:1px solid #334155;background:#0b1220;color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+  .btn:hover{border-color:#475569;background:#0c1a33}
+  .btn.primary{background:linear-gradient(180deg,#1d4ed8,#1e40af);border-color:#1e3a8a}
+  .btn.ghost{background:transparent;border-color:#334155}
+  .btn.small{padding:6px 10px;font-size:13px}
+  .meta{color:var(--muted);font-size:13px}
+  .q{margin:8px 0 10px}
+  .opt{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#0a1324;margin:6px 0}
+  .opt input{margin-top:2px}
+  .opt.correct{border-color:rgba(16,185,129,.6);background:rgba(16,185,129,.08)}
+  .opt.incorrect{border-color:rgba(239,68,68,.6);background:rgba(239,68,68,.08)}
+  .pill{display:inline-block;background:var(--chip);border:1px solid #334155;color:var(--ink2);font-size:12px;border-radius:999px;padding:3px 9px;margin-right:6px}
+  .kbd{background:#0b1220;border:1px solid #334155;border-bottom-color:#1f2937;border-radius:6px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;border-top:1px dashed #334155;padding-top:10px}
+  input[type="text"]{width:100%;padding:10px;border-radius:10px;border:1px solid #1f2937;background:#0b1220;color:var(--ink)}
+  .score{font-size:18px;font-weight:800}
+  .tag{font-size:12px;color:#93c5fd}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="h1">Gazdjog gyakorló teszt</div>
+    <div class="meta"></div>
+    <div class="row" style="margin-top:10px">
+      <button id="startBtn" class="btn primary">Új teszt indítása (20 véletlen kérdés)</button>
+      <button id="showAllBtn" class="btn ghost">Összes kérdés listázása (tanuláshoz)</button>
+      <br />
+      <br><br>
+    </div>
+  </div>
+
+  <div id="testContainer"></div>
+
+  <div id="resultCard" class="card hidden">
+    <div class="h1">Eredmény</div>
+    <div id="scoreLine" class="score"></div>
+    <div id="detailLine" class="meta" style="margin-top:6px"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn primary" id="restartBtn">Új, véletlen 20 kérdés</button>
+      <button class="btn" id="reviewBtn">Összes (aktuális) kérdés megoldásának mutatása</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="h2">Hogyan bővítsd?</div>
+    <ol class="meta">
+      <li>Nyisd meg a fájlt és keresd a <span class="kbd">QUESTION_BANK</span> tömböt.</li>
+      <li>Adj hozzá új objektumot:
+        <pre class="meta" style="white-space:pre-wrap;background:#0b1220;border:1px solid #334155;border-radius:10px;padding:8px;margin-top:6px">{
+  id: "uj-001",
+  type: "mcq", // "mcq" (egyválaszos/többválaszos), "fill" (kitöltős)
+  multi: false, // true = több helyes
+  topic: "Jogi alapok",
+  text: "Példa kérdés?",
+  options: ["A", "B", "C", "D"],
+  correct: [1] // helyes index(ek) 0-alapúan; fill esetén correctText: [...]
+}</pre>
+      </li>
+      <li><b>Többválaszos</b> kérdéshez állítsd <span class="kbd">multi: true</span>-ra, és több indexet adj a <span class="kbd">correct</span>-hez.</li>
+      <li><b>Kitöltős</b> kérdéshez használj <span class="kbd">type: "fill"</span>-t és add meg a <span class="kbd">correctText</span> mezőt (több szinonima is lehet).</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+/** ===========================
+ *  KÉRDÉSBANK (bővíthető)
+ *  – type: "mcq" (egyválaszos/többválaszos) | "fill" (rövid szöveg)
+ *  – multi: true -> több jó válasz
+ *  – correct: [indexek] 0-alapú
+ *  – fill esetén: correctText: ["szó", "szinonima", ...] (kis/nagybetű mindegy)
+ *  Forrás: gazaság jog.docx (feltöltött) – válogatott és strukturált tételek
+ *  ===========================
+ */
+const QUESTION_BANK = [
+  // --- RÖVID KÉRDÉSEK – MCQ (egyválaszos / többválaszos) ---
+  {id:"ja-001",type:"mcq",multi:false,topic:"Jogi alapok",text:"Mit jelent a „jogforrás” kifejezés?",options:["A jogszabály eredete, kibocsátója","A bírói döntés tartalma","A törvények tárgya","Az erkölcsi elvek összessége"],correct:[0]},
+  {id:"ja-002",type:"mcq",multi:false,topic:"Közjog",text:"Ki gyakorolja Magyarországon a végrehajtó hatalmat?",options:["Köztársasági elnök","Kormány","Országgyűlés","Alkotmánybíróság"],correct:[1]},
+  {id:"ja-003",type:"mcq",multi:true, topic:"Jogi norma",text:"Melyek a jogi norma elemei?",options:["Hipotézis","Jogkövetkezmény","Elvárás","Diszpozíció"],correct:[0,1,3]},
+  {id:"ja-004",type:"mcq",multi:false,topic:"Magánjog",text:"Melyik jogág a magánjog része?",options:["Büntetőjog","Közigazgatási jog","Polgári jog","Alkotmányjog"],correct:[2]},
+  {id:"ja-005",type:"mcq",multi:true, topic:"Polgári jog",text:"A polgári jogviszony alapelvei közé tartozik:",options:["Egyenrangúság","Mellérendeltség","Fegyelmi alárendeltség","Együttműködés elve"],correct:[0,1,3]},
+  {id:"ja-006",type:"mcq",multi:false,topic:"Dologi jog",text:"Mit jelent a „dolog” jogi értelemben?",options:["Minden birtokba vehető testi tárgy","Csak ingatlan","Csak forgalomképes tárgy","Minden, amit az állam kijelöl"],correct:[0]},
+  {id:"ja-007",type:"mcq",multi:false,topic:"Dologi jog",text:"Melyik NEM a tulajdonjog tartalma?",options:["Birtoklás","Használat","Öröklés","Rendelkezés"],correct:[2]},
+  {id:"ja-008",type:"mcq",multi:false,topic:"Bírósági rendszer",text:"A Kúria feladata:",options:["Alkotmányos panaszok vizsgálata","Legfelsőbb bírói fórum, jogegységi döntések","Törvényalkotás","Jogalkotás felügyelete"],correct:[1]},
+  {id:"ja-009",type:"mcq",multi:false,topic:"Személyek joga",text:"Mikor kezdődik az ember jogképessége?",options:["Fogantatással","Élve születéssel","18 éves korban","Szülői nyilatkozattal"],correct:[1]},
+  {id:"ja-010",type:"mcq",multi:true, topic:"Dologi jog",text:"Melyek a tulajdonszerzés eredeti módjai?",options:["Elbirtoklás","Találás","Adásvétel","Hatósági határozat"],correct:[0,1,3]},
+  {id:"ja-011",type:"mcq",multi:false,topic:"Közjog",text:"A helyi önkormányzat jogállása:",options:["Jogi személy","Állami szerv","Pártintézmény","Egyesület"],correct:[0]},
+  {id:"ja-012",type:"mcq",multi:false,topic:"Bírósági rendszer",text:"Ki nevezi ki a bírákat?",options:["Országgyűlés","Köztársasági elnök","Miniszterelnök","Kúria"],correct:[1]},
+  {id:"ja-013",type:"mcq",multi:false,topic:"Személyiségi jogok",text:"Melyik NEM személyiségi jog?",options:["Névviseléshez való jog","Magántitok védelme","Tulajdonhoz való jog","Képmáshoz való jog"],correct:[2]},
+  {id:"ja-014",type:"mcq",multi:false,topic:"Személyek joga",text:"Mikor szűnik meg a jogképesség?",options:["A halállal","18 éves korban","Cselekvőképtelenséggel","Házasságkötéssel"],correct:[0]},
+  {id:"ja-015",type:"mcq",multi:false,topic:"Közjog",text:"Melyik szerv gyakorolja a törvényhozó hatalmat?",options:["Kormány","Országgyűlés","Köztársasági elnök","Alkotmánybíróság"],correct:[1]},
+  {id:"ja-016",type:"mcq",multi:true, topic:"Dologi jog",text:"Mi tartozik a dologi jog körébe?",options:["Tulajdonjog","Zálogjog","Haszonélvezet","Kötelmi jog"],correct:[0,1,2]},
+  {id:"ja-017",type:"mcq",multi:false,topic:"Ingatlanjog",text:"Ingatlan átruházásnál mikor jön létre a tulajdonszerzés?",options:["Szerződés aláírásakor","Birtokba adáskor","Ingatlan-nyilvántartási bejegyzéssel","Szóban"],correct:[2]},
+  {id:"ja-018",type:"mcq",multi:false,topic:"Pénzügy",text:"Ki gyakorolja a monetáris politikát?",options:["Kormány","Magyar Nemzeti Bank","Alkotmánybíróság","Kúria"],correct:[1]},
+  {id:"ja-019",type:"mcq",multi:false,topic:"Polgári jog",text:"Mit jelent az „abszolút szerkezetű jogviszony”?",options:["Csak két fél között jön létre","Egy jogosulttal szemben mindenki más kötelezett","Több fél közötti egyenlőség","Csak szerződés alapján létezik"],correct:[1]},
+  {id:"ja-020",type:"mcq",multi:false,topic:"Személyek joga",text:"A polgári jog alanya lehet:",options:["Csak természetes személy","Természetes és jogi személy","Csak az állam","Csak gazdasági társaság"],correct:[1]},
+  {id:"ja-021",type:"mcq",multi:false,topic:"Birtokvédelem",text:"Mi a „tilos önhatalom”?",options:["Jogos önvédelmi cselekmény","Jogosulatlan beavatkozás más birtokába","Bírósági döntés nélküli jogérvényesítés","A és B együtt"],correct:[3]},
+  {id:"ja-022",type:"mcq",multi:false,topic:"Birtokvédelem",text:"Melyik hatóság ad birtokvédelmet 1 éven belül?",options:["Jegyző","Bíróság","Rendőrség","Ügyészség"],correct:[0]},
+  {id:"ja-023",type:"mcq",multi:true, topic:"Közjog",text:"Melyek a közjog jellemzői?",options:["Állam és egyén viszonya","Alá-fölérendeltség","Egyenjogúság","Magánfelek mellérendeltsége"],correct:[0,1]},
+  {id:"ja-024",type:"mcq",multi:false,topic:"Ptk.",text:"Mit szabályoz a Polgári Törvénykönyv?",options:["Gazdasági és vagyoni viszonyokat","Büntetőeljárást","Közjogi kapcsolatokat","Rendőri intézkedéseket"],correct:[0]},
+  {id:"ja-025",type:"mcq",multi:false,topic:"Személyek joga",text:"Mi a jogképességet korlátozó nyilatkozat jogi minősítése?",options:["Hatályos","Semmis","Érvényes","Felfüggesztett"],correct:[1]},
+  {id:"ja-026",type:"mcq",multi:false,topic:"Szolgalom",text:"Ki az uralkodó telek a telki szolgalomnál?",options:["A használatot tűrő telek","A használatot élvező telek","Az eladó telek","Állami föld"],correct:[1]},
+  {id:"ja-027",type:"mcq",multi:true, topic:"Korlátolt dologi jog",text:"Melyik állítás igaz a haszonélvezetre?",options:["Idegen dolgon gyakorolható","Elidegeníthető","A használat és hasznok szedésének joga","Tulajdonátruházást jelent"],correct:[0,2]},
+  {id:"ja-028",type:"mcq",multi:false,topic:"Öröklés",text:"Mikor következik be az öröklés?",options:["Hagyatéki végzés jogerőre emelkedésekor","Az örökhagyó halálakor","Közjegyzői döntés után","Végrendelet olvasásakor"],correct:[1]},
+  {id:"ja-029",type:"mcq",multi:false,topic:"Öröklés",text:"Mi a „kötelesrész”?",options:["A törvényes örökösnek járó 1/3 rész","Állami illeték","Végrendelet érvényességi feltétele","Közjegyző díja"],correct:[0]},
+  {id:"ja-030",type:"mcq",multi:false,topic:"Ptk.",text:"Melyik a Ptk. ötödik könyve?",options:["Családjog","Dologi jog","Kötelmi jog","Öröklési jog"],correct:[1]},
+  {id:"ja-031",type:"mcq",multi:false,topic:"Szomszédjog",text:"A szomszédjogok korlátozzák:",options:["Rendelkezési jogot","Birtoklási jogot","Használati jogot","Öröklési jogot"],correct:[2]},
+  {id:"ja-032",type:"mcq",multi:true, topic:"Öröklés",text:"Ki lehet örökös törvény szerint?",options:["Egyenesági rokon","Házastárs","Barát","Testvér"],correct:[0,1,3]},
+  {id:"ja-033",type:"mcq",multi:false,topic:"Birtok",text:"Mikor beszélünk jóhiszemű birtoklásról?",options:["Ha a birtokos nem tudja, hogy nem jogosult","Ha szándékosan elfoglalja","Ha visszaadja","Ha bíróság engedélyezi"],correct:[0]},
+  {id:"ja-034",type:"mcq",multi:false,topic:"Alkotmányosság",text:"Melyik szerv feladata az Alaptörvény védelme?",options:["Alkotmánybíróság","Kúria","Legfőbb Ügyészség","Országgyűlés"],correct:[0]},
+  {id:"ja-035",type:"mcq",multi:true, topic:"Jog–erkölcs",text:"Mi az erkölcsi és jogi norma különbsége?",options:["A jogi kényszer állami, az erkölcsi közösségi","A jog pontos, az erkölcs általános","A jog önkéntes","Csak B"],correct:[0,1]},
+  {id:"ja-036",type:"mcq",multi:false,topic:"Dologi jog",text:"Melyik nem korlátolt dologi jog?",options:["Szolgalom","Zálogjog","Haszonélvezet","Tulajdonjog"],correct:[3]},
+  {id:"ja-037",type:"mcq",multi:true, topic:"Cselekvőképesség",text:"Mikor jön létre cselekvőképesség?",options:["14 éves kortól korlátozott formában","18 éves kortól teljesen","Születéskor","16 évesen"],correct:[0,1]},
+  {id:"ja-038",type:"mcq",multi:false,topic:"Kiskorúak",text:"Mit tehet a 15 éves kiskorú törvényes képviselő nélkül?",options:["Bármit szerződhet","Mindennapi élet szokásos ügyletei","Ingatlant elad","Házasságot köt"],correct:[1]},
+  {id:"ja-039",type:"mcq",multi:false,topic:"Dologi jog",text:"Mi a hasznosítás joga?",options:["A dolog jövedelmező felhasználása","Tulajdonátruházás","Csak mezőgazdasági cél","Csak ingatlan"],correct:[0]},
+  {id:"ja-040",type:"mcq",multi:false,topic:"Bírósági rendszer",text:"Melyik bíróság szintje a legmagasabb?",options:["Ítélőtábla","Törvényszék","Kúria","A és B"],correct:[2]},
+  {id:"ja-041",type:"mcq",multi:false,topic:"Birtok",text:"Mikor keletkezik a birtok?",options:["Amikor a dolog tényleges hatalmába kerül","Szerződés aláírásakor","Bejegyzéssel","Szóbeli egyezséggel"],correct:[0]},
+  {id:"ja-042",type:"mcq",multi:true, topic:"Jogforrás",text:"Melyik lehet a jogforrás formája?",options:["Törvény","Rendelet","Alaptörvény","Bírói döntés"],correct:[0,1,2]},
+  {id:"ja-043",type:"mcq",multi:false,topic:"Bizonyítás",text:"Mi a vélelem?",options:["Valószínű tény valósnak tekintése","Bizonyított igazság","Törvényi szankció","Jogalap nélküli norma"],correct:[0]},
+  {id:"ja-044",type:"mcq",multi:false,topic:"Jogtechnika",text:"Mi a fikció jogi értelemben?",options:["Valótlan tényállás valósnak tekintése","Valós tény figyelmen kívül hagyása","Jogi hiba","Erkölcsi norma"],correct:[0]},
+  {id:"ja-045",type:"mcq",multi:false,topic:"Jogforrás",text:"Melyik szerv alkot rendeletet?",options:["Kormány","Miniszter","Önkormányzat","Mindhárom"],correct:[3]},
+  {id:"ja-046",type:"mcq",multi:false,topic:"Közérdekű használat",text:"Melyik a helyes a közérdekű használatra?",options:["Mindig jár kártalanítás","Soha nem jár kártalanítás","Csak jóhiszeműen jár","Csak szerződéssel jár"],correct:[0]},
+  {id:"ja-047",type:"mcq",multi:true, topic:"Személyiségi jogok",text:"Melyik tartozik a személyiségi jogok közé?",options:["Jóhírnév védelme","Becsület védelme","Szerződéskötési szabadság","Képmás védelme"],correct:[0,1,3]},
+  {id:"ja-048",type:"mcq",multi:false,topic:"Ptk.",text:"Melyik a Polgári Törvénykönyv harmadik könyve?",options:["Családjog","Jogi személyek","Dologi jog","Öröklési jog"],correct:[1]},
+  {id:"ja-049",type:"mcq",multi:false,topic:"Jogalkotás",text:"Mi a jogalkotás célja?",options:["Jogszabályok létrehozása","Erkölcsi normák alkotása","Rendőrségi szabályozás","Pénzügyi tervezés"],correct:[0]},
+  {id:"ja-050",type:"mcq",multi:true, topic:"Népképviselet",text:"Melyik szervezet gyakorolja a közvetlen népképviseletet?",options:["Országgyűlés","Kormány","Önkormányzat","Köztársasági elnök"],correct:[0,2]},
+
+  // --- Gt / jogi személyek (válogatás a Wordből) ---
+  {id:"gt-001",type:"mcq",multi:false,topic:"Jogi személy",text:"Mi a jogi személy egyik alapvető jellemzője?",options:["Nincs saját neve","Saját névvel és elkülönített vagyonnal rendelkezik","Nem lehet perelni","Nincs székhelye"],correct:[1]},
+  {id:"gt-002",type:"mcq",multi:false,topic:"Jogi személy",text:"Mikor jön létre a jogi személy jogilag?",options:["A szerződés aláírásával","Nyilvántartásba vétellel","Szóbeli megállapodással","Első befizetéssel"],correct:[1]},
+  {id:"gt-003",type:"mcq",multi:true, topic:"Jogi személy",text:"Melyek a jogi személy kötelező ismertetőjegyei?",options:["Saját név","Székhely","Alapítólevél","Állami támogatás"],correct:[0,1]},
+  {id:"gt-004",type:"mcq",multi:false,topic:"Jogi személy",text:"Mi a létesítő okirat célja?",options:["Erkölcsi nyilatkozat","Alapítás és működés rögzítése","Csak adózási nyilatkozat","Cégjegyzéki kivonat helyettesítője"],correct:[1]},
+  {id:"gt-005",type:"mcq",multi:false,topic:"Jogi személy",text:"Melyik NEM kötelező tartalmi elem a létesítő okiratban?",options:["Név","Székhely","Cégtábla színe","Cél és tevékenység"],correct:[2]},
+  {id:"gt-006",type:"mcq",multi:false,topic:"Jogi személy",text:"Ki nyújtja be a bejegyzési kérelmet?",options:["Legidősebb tag","Képviseletre kijelölt személy","Könyvvizsgáló","Jogtanácsos"],correct:[1]},
+  {id:"gt-007",type:"mcq",multi:false,topic:"Szervezetrend",text:"A jogi személy főbb szervei:",options:["Taggyűlés, ügyvezetés, ellenőrző szerv","Ügyvezetés, tanács, jegyző","Alapító, bíróság, közgyűlés","FB, ügyészség, elnök"],correct:[0]},
+  {id:"gt-008",type:"mcq",multi:true, topic:"Megszűnés",text:"A jogi személy megszűnhet:",options:["Jogutódlással","Jogutód nélkül","Csak bírósági ítélettel","Taggyűlés döntésével"],correct:[0,1,3]},
+  {id:"gt-009",type:"mcq",multi:false,topic:"Egyesülés",text:"Mi az „egyesülés” fő célja?",options:["Saját nyereségszerzés","Tagok gazdálkodásának összehangolása","Politikai képviselet","Alapítványi cél"],correct:[1]},
+  {id:"gt-010",type:"mcq",multi:false,topic:"Egyesület",text:"Hány fő alapíthat egyesületet?",options:["3","5","10","2"],correct:[2]},
+  {id:"gt-011",type:"mcq",multi:false,topic:"Nyilvántartás",text:"Melyik szerv tartja nyilván az egyesületeket és alapítványokat?",options:["Kormányhivatal","Törvényszék","Cégbíróság","Jegyző"],correct:[1]},
+  {id:"gt-012",type:"mcq",multi:false,topic:"Alapítvány",text:"Az alapítvány célja:",options:["Tagok nyereségszerzése","Tartós, közérdekű cél megvalósítása","Gazdasági társaság támogatása","Hitelezői kielégítés"],correct:[1]},
+  {id:"gt-013",type:"mcq",multi:false,topic:"Gazdasági társaság",text:"Mi a gazdasági társaság definíciója?",options:["Profit nélküli szervezet","Üzletszerű közös tevékenységre alakult jogi személy","Egyéni vállalkozás","Állami cég"],correct:[1]},
+  {id:"gt-014",type:"mcq",multi:true, topic:"Gt jellemzők",text:"A gazdasági társaság alapvető jellemzői:",options:["Elkülönült vagyon","Célrarendeltség","Önálló felelősség","Tagok személyes felelőssége mindig"],correct:[0,1,2]},
+  {id:"gt-015",type:"mcq",multi:false,topic:"Elvek",text:"Melyik elv tiltja, hogy valaki csak nyereségből részesedjen, veszteséget ne viseljen?",options:["Formakényszer","Societas Leonina-tilalom","Társulási szabadság","Diszpozitivitás"],correct:[1]},
+  {id:"gt-016",type:"mcq",multi:false,topic:"Formák",text:"Hányféle gazdasági társaság létezik a Ptk. szerint?",options:["3","4","5","6"],correct:[1]},
+  {id:"gt-017",type:"mcq",multi:false,topic:"Előtársaság",text:"Mikor válik egy társaság előtársasággá?",options:["Aláírás után","Ellenjegyzéstől/közokirattól","Bejegyzés napján","Székhely megnyitásakor"],correct:[1]},
+  {id:"gt-018",type:"mcq",multi:true, topic:"Felelősség",text:"Melyik formában korlátlan és egyetemleges a tag felelőssége?",options:["Bt. beltag","Kkt.","Zrt.","Kft."],correct:[0,1]},
+  {id:"gt-019",type:"mcq",multi:true, topic:"Szervek",text:"A gazdasági társaságok szervei:",options:["Taggyűlés/Közgyűlés","Ügyvezetés","Felügyelőbizottság","Könyvvizsgáló"],correct:[0,1,2,3]},
+  {id:"gt-020",type:"mcq",multi:false,topic:"Vezetés",text:"Ki nem lehet vezető tisztségviselő?",options:["Összeférhetetlen gazdasági érdekű","Gazdasági bcs. miatt elítélt","Rokon","Azonos tevékenységű társaság vezetője"],correct:[0,1,3]},
+
+  // --- Kft. / Rt. specifikus (Word alapján) ---
+  {id:"kft-001",type:"mcq",multi:false,topic:"Kft.",text:"Mekkora a Kft. minimális törzstőkéje?",options:["50 000 Ft","100 000 Ft","3 000 000 Ft","5 000 000 Ft"],correct:[2]},
+  {id:"kft-002",type:"mcq",multi:false,topic:"Kft.",text:"Mit jelent az üzletrész?",options:["Törzsbetéthez kapcsolódó tagsági jogok/kötelezettségek összessége","Részvény","Tulajdoni lap","Ingatlanjog"],correct:[0]},
+  {id:"kft-003",type:"mcq",multi:true, topic:"Aport",text:"Mi lehet a nem pénzbeli hozzájárulás (aport) tárgya?",options:["Dolog","Követelés","Szolgáltatás","Szellemi alkotás"],correct:[0,1,3]},
+  {id:"kft-004",type:"mcq",multi:false,topic:"Előtársaság",text:"Mikor jogképes az előtársaság?",options:["Soha","Alapítás után, bejegyzésig korlátozottan","Csak bejegyzés után","Csak a végzés napjától"],correct:[1]},
+  {id:"gt-021",type:"mcq",multi:true, topic:"Felügyelőbizottság",text:"Mikor kötelező a felügyelőbizottság?",options:["Zrt. – 5% részvényesi kérésre","Nyrt. – mindig","200 fő felett, ha az üzemi tanács nem mond le","Minden Kft.-nél"],correct:[0,1,2]},
+  {id:"gt-022",type:"mcq",multi:false,topic:"Kisebbségi jog",text:"Mi a kisebbségi jogok küszöbe?",options:["1%","5%","10%","25%"],correct:[1]},
+  {id:"gt-023",type:"mcq",multi:false,topic:"Kisebbségi jog",text:"Mit tehet a kisebbség?",options:["Taggyűlést kérhet","Könyvvizsgálatot kérhet","Felszámolást indíthat","Mindhárom"],correct:[3]},
+  {id:"kft-005",type:"mcq",multi:false,topic:"Pótbefizetés",text:"Mi a pótbefizetés célja?",options:["Tagok kifizetése","Veszteség fedezése","Vagyon növelése","Új tag beléptetése"],correct:[1]},
+  {id:"rt-001", type:"mcq",multi:false,topic:"Rt.",text:"Mi a részvénytársaság fő jellemzője?",options:["Részvényekből álló alaptőke","Tagok személyes felelőssége","Nem jogi személy","Nincs alaptőke"],correct:[0]},
+  {id:"rt-002", type:"mcq",multi:false,topic:"Rt.",text:"Mekkora a Zrt. minimális alaptőkéje?",options:["1 M Ft","5 M Ft","10 M Ft","20 M Ft"],correct:[1]},
+  {id:"rt-003", type:"mcq",multi:false,topic:"Rt.",text:"Mekkora az Nyrt. minimális alaptőkéje?",options:["5 M Ft","10 M Ft","20 M Ft","50 M Ft"],correct:[2]},
+  {id:"rt-004", type:"mcq",multi:true, topic:"Részvényfajták",text:"Melyek lehetnek részvényfajták?",options:["Törzsrészvény","Elsőbbségi részvény","Dolgozói részvény","Kamatozó részvény"],correct:[0,1,2,3]},
+  {id:"rt-005", type:"mcq",multi:false,topic:"Rt.",text:"Mit jelent az Nyrt.?",options:["Részvényei tőzsdére be vannak vezetve","Nyitott közgyűlés","Nincs igazgatóság","Egy részvényes"],correct:[0]},
+  {id:"rt-006", type:"mcq",multi:false,topic:"Rt.",text:"Ki hozza a stratégiai döntéseket egy Rt.-ben?",options:["Igazgatóság","Közgyűlés","Felügyelőbizottság","Könyvvizsgáló"],correct:[1]},
+  {id:"rt-007", type:"mcq",multi:true, topic:"Részvényesi jogok",text:"A részvényes jogai:",options:["Közgyűlésen részvétel","Szavazás","Osztalék","FB megválasztása"],correct:[0,1,2]},
+  {id:"rt-008", type:"mcq",multi:false,topic:"Vezetés",text:"Mi a felmentvény joghatása?",options:["Megszünteti a vezető tisztségviselő polgári jogi felelősségét","Büntetőjogi mentesség","Kinevezés hosszabbítása","Csak Kft.-nél"],correct:[0]},
+
+  // --- KITÖLTŐS (a 4 „szövegbeillesztős” blokk szétbontva) ---
+  // Jogi alapok – 10 kitöltős
+  {id:"fill-ja-01",type:"fill",topic:"Jogi alapok",text:"A ________ az emberi társadalom általánosan kötelező magatartási szabályainak rendszere.",correctText:["jog"]},
+  {id:"fill-ja-02",type:"fill",topic:"Jogi alapok",text:"A jog mindig az ________ által létrehozott és kikényszeríthető szabályokat tartalmazza.",correctText:["állam","állam által"]},
+  {id:"fill-ja-03",type:"fill",topic:"Jogi alapok",text:"A jog két fő ága: ________ és ________.",correctText:["magánjog és közjog","közjog és magánjog","magánjog, közjog","közjog, magánjog"]},
+  {id:"fill-ja-04",type:"fill",topic:"Jogi alapok",text:"A jogi ________ három részből áll: feltétel, előírás, szankció.",correctText:["norma"]},
+  {id:"fill-ja-05",type:"fill",topic:"Jogi alapok",text:"Hipotézis – Diszpozíció – ________.",correctText:["jogkövetkezmény","szankció"]},
+  {id:"fill-ja-06",type:"fill",topic:"Jogi alapok",text:"Magyarország legmagasabb szintű jogforrása az ________.",correctText:["alaptörvény"]},
+  {id:"fill-ja-07",type:"fill",topic:"Jogi alapok",text:"A törvényeket az ________ hozza.",correctText:["országgyűlés"]},
+  {id:"fill-ja-08",type:"fill",topic:"Jogi alapok",text:"Az ________ feladata az Alaptörvény védelme.",correctText:["alkotmánybíróság"]},
+  {id:"fill-ja-09",type:"fill",topic:"Jogi alapok",text:"A kormány által kibocsátott jogforrás a ________.",correctText:["kormányrendelet","rendelet"]},
+  {id:"fill-ja-10",type:"fill",topic:"Jogi alapok",text:"A jogállam elve szerint minden állami szerv a ________ alapján működik.",correctText:["jog","jogszabályok","törvény"]},
+
+  // Polgári jog – Az ember – 10 kitöltős
+  {id:"fill-emb-01",type:"fill",topic:"Polgári jog – ember",text:"A ________ a társadalom vagyoni és személyi viszonyait szabályozza.",correctText:["polgári jog"]},
+  {id:"fill-emb-02",type:"fill",topic:"Polgári jog – ember",text:"A polgári jog alapelve az alanyok ________ és ________.",correctText:["egyenjogúság és mellérendeltség","mellérendeltség és egyenjogúság"]},
+  {id:"fill-emb-03",type:"fill",topic:"Polgári jog – ember",text:"Az ember jogai és kötelezettségei lehetnek – ez a ________.",correctText:["jogképesség"]},
+  {id:"fill-emb-04",type:"fill",topic:"Polgári jog – ember",text:"A jogképesség kezdete az élve születés, de a ________ feltételesen jogképes.",correctText:["magzat"]},
+  {id:"fill-emb-05",type:"fill",topic:"Polgári jog – ember",text:"A jogképesség a ________ pillanatában szűnik meg.",correctText:["halál"]},
+  {id:"fill-emb-06",type:"fill",topic:"Polgári jog – ember",text:"A ________ azt jelenti, hogy az ember saját nevében jogokat szerezhet és kötelezettségeket vállalhat.",correctText:["cselekvőképesség"]},
+  {id:"fill-emb-07",type:"fill",topic:"Polgári jog – ember",text:"A cselekvőképesség korlátozható, ha a személyt bíróság ________ alá helyezi.",correctText:["gondnokság","gondnokság alá"]},
+  {id:"fill-emb-08",type:"fill",topic:"Polgári jog – ember",text:"A személyiségi jogok védik többek között az ember ________ és ________.",correctText:["becsület és jóhírnév","jóhírnév és becsület"]},
+  {id:"fill-emb-09",type:"fill",topic:"Polgári jog – ember",text:"Személyiségi jogsértés esetén ________ követelhető.",correctText:["sérelemdíj"]},
+  {id:"fill-emb-10",type:"fill",topic:"Polgári jog – ember",text:"A személyiségi jogok alapja az emberi ________.",correctText:["méltóság"]},
+
+  // Dologi jog – 10 kitöltős
+  {id:"fill-dol-01",type:"fill",topic:"Dologi jog",text:"A ________ minden birtokba vehető testi tárgy.",correctText:["dolog"]},
+  {id:"fill-dol-02",type:"fill",topic:"Dologi jog",text:"A dolog lehet ________ vagy ________.",correctText:["ingó és ingatlan","ingatlan és ingó"]},
+  {id:"fill-dol-03",type:"fill",topic:"Dologi jog",text:"Forgalomképesség szerint lehet forgalomképtelen, korlátozottan ________, vagy ________.",correctText:["forgalomképes, forgalomképes"]},
+  {id:"fill-dol-04",type:"fill",topic:"Dologi jog",text:"A ________ a dolog feletti teljes és kizárólagos uralmat biztosítja.",correctText:["tulajdonjog"]},
+  {id:"fill-dol-05",type:"fill",topic:"Dologi jog",text:"A ________ a dolog feletti tényleges hatalom.",correctText:["birtok"]},
+  {id:"fill-dol-06",type:"fill",topic:"Dologi jog",text:"A ________ idegen dolog használatát és hasznainak szedését biztosítja.",correctText:["haszonélvezet","haszonelvezet"]},
+  {id:"fill-dol-07",type:"fill",topic:"Dologi jog",text:"A ________ idegen dolog biztosítékaként szolgál.",correctText:["zálogjog"]},
+  {id:"fill-dol-08",type:"fill",topic:"Dologi jog",text:"A ________ másik telek használatának jogát biztosítja.",correctText:["szolgalom","telki szolgalom"]},
+  {id:"fill-dol-09",type:"fill",topic:"Dologi jog",text:"Az ________ eredeti szerzésmód, tartós birtoklás után.",correctText:["elbirtoklás","elbirtoklas"]},
+  {id:"fill-dol-10",type:"fill",topic:"Dologi jog",text:"Példa: ________ (bútor) és ________ (ház).",correctText:["ingó és ingatlan","ingatlan és ingó","ingó, ingatlan","ingatlan, ingó"]},
+
+  // Jogi személyek & Gt 
+  {id:"fill-gt-01",type:"fill",topic:"Jogi személy/Gt",text:"A ________ jogképes, jogai és kötelezettségei lehetnek.",correctText:["jogi személy"]},
+  {id:"fill-gt-02",type:"fill",topic:"Jogi személy/Gt",text:"Kötelező jellemző: saját név, ________, elkülönített vagyon, szervezet.",correctText:["székhely"]},
+  {id:"fill-gt-03",type:"fill",topic:"Jogi személy/Gt",text:"A létrehozás dokumentuma a ________.",correctText:["létesítő okirat","társasági szerződés","alapszabály","alapító okirat"]},
+  {id:"fill-gt-04",type:"fill",topic:"Jogi személy/Gt",text:"A bejegyzést a ________ végzi.",correctText:["cégbíróság"]},
+  {id:"fill-gt-05",type:"fill",topic:"Jogi személy/Gt",text:"Nonprofit szervezet: ________ és ________.",correctText:["egyesület és alapítvány","alapítvány és egyesület"]},
+  {id:"fill-gt-06",type:"fill",topic:"Jogi személy/Gt",text:"A ________ a tagok szükségleteit elégíti ki, nyitott tagsággal.",correctText:["szövetkezet","szovetkezet"]},
+  {id:"fill-gt-07",type:"fill",topic:"Jogi személy/Gt",text:"Gt-formák: ________, ________, ________, ________.",correctText:["kkt, bt, kft, rt","kkt bt kft rt"]},
+  {id:"fill-gt-08",type:"fill",topic:"Jogi személy/Gt",text:"Az ellenőrzést a ________ látja el.",correctText:["felügyelőbizottság","fb","felugyelobizottsag"]},
+  {id:"fill-gt-09",type:"fill",topic:"Jogi személy/Gt",text:"Korlátolt felelősségű társaság rövidítése: ________.",correctText:["kft"]},
+  {id:"fill-gt-10",type:"fill",topic:"Jogi személy/Gt",text:"Részvénytársaság rövidítése: ________.",correctText:["rt","zrt","nyrt"]},
+  {id:"fill-gt-11",type:"fill",topic:"Jogi személy/Gt",text:"A gazdasági társaság alapító okirata a ________.",correctText:["társasági szerződés","létesítő okirat"]},
+  {id:"fill-gt-12",type:"fill",topic:"Jogi személy/Gt",text:"Tőzsdén jegyzett részvénytársaság: ________.",correctText:["nyrt","nyilvánosan működő rt","nyilvanosan mukodo rt"]},
+];
+// --- Munkajog (Mt.) 
+QUESTION_BANK.push(
+  {id:"mt-001",type:"mcq",multi:false,topic:"Munkajog",text:"A munkajog szűk értelemben mire terjed ki?",options:["Minden munkavégzésre","Csak a munkaviszonyokra","Csak a közszolgálati jogviszonyokra","Csak a vállalkozási jogviszonyokra"],correct:[1]}, // :contentReference[oaicite:1]{index=1}
+  {id:"mt-002",type:"mcq",multi:true, topic:"Munkajog",text:"Az Alaptörvény XVII. cikk (munka világa) mely jogokat ismeri el?",options:["Kollektív tárgyalás és KSZ","Munkabeszüntetéshez való jog","Éves fizetett szabadság","Minden munkaviszony határozatlan idejű"],correct:[0,1,2]}, // :contentReference[oaicite:2]{index=2}
+  {id:"mt-003",type:"mcq",multi:true, topic:"Munkajog",text:"Az Mt. fő jogforrásai és kapcsolódó források:",options:["Alaptörvény","Mt. – 2012. évi I. tv.","Kollektív szerződés","ILO-egyezmények, uniós jog"],correct:[0,1,2,3]}, // :contentReference[oaicite:3]{index=3}
+  {id:"mt-004",type:"mcq",multi:false,topic:"Munkajog",text:"Az Mt. hatálya alapesetben hol terjed ki a munkavégzésre?",options:["Ahol a munkáltató székhelye van","Ahol a munkavállaló lakik","Ahol a munkát rendszerint Magyarországon végzik","Mindig az EU teljes területén"],correct:[2]}, // :contentReference[oaicite:4]{index=4}
+  {id:"mt-005",type:"mcq",multi:false,topic:"Munkajog",text:"Mi minősül munkaviszonynak az Mt. szerint?",options:["Megbízási szerződés szerinti tevékenység","Vállalkozási szerződés szerinti tevékenység","Munkaszerződés alapján, munkáltató irányítása alatt végzett munka díjazásért","Önkéntes munka"],correct:[2]}, // :contentReference[oaicite:5]{index=5}
+  {id:"mt-006",type:"mcq",multi:true, topic:"Munkajog",text:"Atipikus munkaviszony lehet:",options:["Határozott idejű","Részmunkaidős","Távmunka","Munkaerő-kölcsönzés"],correct:[0,1,2,3]}, // :contentReference[oaicite:6]{index=6}
+  {id:"mt-007",type:"mcq",multi:false,topic:"Munkajog",text:"Munkavállaló általános életkori főszabály:",options:["14 év","15 év","16 év","18 év"],correct:[2]}, // :contentReference[oaicite:7]{index=7}
+  {id:"mt-008",type:"mcq",multi:true, topic:"Munkajog",text:"Kötelező írásbeliség alá esik:",options:["Munkaszerződés megkötése/módosítása/megszüntetése","Kollektív szerződés","Munkaidő-beosztás minden napi közlése","Munkaviszony létesítésekor adott tájékoztatás"],correct:[0,1,3]}, // :contentReference[oaicite:8]{index=8}
+  {id:"mt-009",type:"mcq",multi:false,topic:"Munkajog",text:"Munkaszerződés kötelező tartalmi eleme NEM ez:",options:["Munkakör","Alapbér","Munkavégzés helye","Bérpótlék pontos fajtái"],correct:[3]}, // :contentReference[oaicite:9]{index=9}
+  {id:"mt-010",type:"mcq",multi:false,topic:"Munkajog",text:"Próbaidő főszabály szerint legfeljebb:",options:["1 hónap","2 hónap","3 hónap","6 hónap"],correct:[2]}, // :contentReference[oaicite:10]{index=10}
+  {id:"mt-011",type:"mcq",multi:false,topic:"Munkajog",text:"A teljes napi munkaidő általános mértéke:",options:["6 óra","7 óra","8 óra","12 óra"],correct:[2]}, // :contentReference[oaicite:11]{index=11}
+  {id:"mt-012",type:"mcq",multi:true, topic:"Munkajog",text:"Munkaközi szünet és pihenőidő fő szabályai:",options:["6+ óra munka esetén min. 20 perc szünet","9+ óra után +25 perc szünet","Napi pihenőidő legalább 11 óra","Heti pihenő megszakítás nélkül 48 óra"],correct:[0,1,2,3]}, // :contentReference[oaicite:12]{index=12}
+  {id:"mt-013",type:"mcq",multi:false,topic:"Munkajog",text:"Éves rendes alapszabadság mértéke:",options:["15 nap","20 nap","25 nap","30 nap"],correct:[1]}, // :contentReference[oaicite:13]{index=13}
+  {id:"mt-014",type:"mcq",multi:false,topic:"Munkajog",text:"Teljes napi munkaidő esetén rendelhető rendkívüli munka (alapkeret) évente:",options:["100 óra","150 óra","200 óra","250 óra"],correct:[3]}, // :contentReference[oaicite:14]{index=14}
+  {id:"mt-015",type:"mcq",multi:true, topic:"Munkajog",text:"Ügyelet és készenlét megkülönböztetése:",options:["Ügyelet: a helyet a munkáltató határozza meg","Készenlét: helyet a munkavállaló határozza meg","Mindkettő beleszámít teljes egészében munkaidőbe","Rendelkezésre állás maximális ideje 24 óra"],correct:[0,1,3]}, // :contentReference[oaicite:15]{index=15}
+  {id:"mt-016",type:"mcq",multi:true, topic:"Munkajog",text:"Munkáltató alapvető kötelezettségei közé tartozik:",options:["Foglalkoztatási kötelezettség","Munkafeltételek biztosítása","Munkaköri alkalmassági vizsgálat biztosítása","Kártérítési kötelezettség szabályai szerint helytállás"],correct:[0,1,2,3]}, // :contentReference[oaicite:16]{index=16}
+  {id:"mt-017",type:"mcq",multi:false,topic:"Munkajog",text:"A munkabér fogalma:",options:["Mindig a vállalat eredményétől függ","A munkaviszonyra tekintettel járó ellenszolgáltatás","Csak teljesítménybér lehet","Csak pótlékok összessége"],correct:[1]}, // :contentReference[oaicite:17]{index=17}
+  {id:"mt-018",type:"mcq",multi:false,topic:"Munkajog",text:"2024.01.01-től a havi bruttó minimálbér összege:",options:["232 000 Ft","266 800 Ft","300 000 Ft","326 000 Ft"],correct:[1]}, // :contentReference[oaicite:18]{index=18}
+  {id:"mt-019",type:"mcq",multi:false,topic:"Munkajog",text:"A munkaviszony megszüntetésének módja NEM ez:",options:["Felmondás","Azonnali hatályú felmondás","Közös megegyezés","Elállás a teljes idő alatt bármikor indok nélkül"],correct:[3]}, // :contentReference[oaicite:19]{index=19}
+  {id:"mt-020",type:"mcq",multi:true, topic:"Munkajog",text:"Végkielégítés tipikus esetei:",options:["Munkáltatói felmondás","Jogutód nélküli megszűnés","Jogviszonyváltás bizonyos esetei","Munkavállalói felmondás bármikor"],correct:[0,1,2]}, // :contentReference[oaicite:20]{index=20}
+  {id:"mt-021",type:"mcq",multi:true, topic:"Munkajog",text:"Azonnali hatályú felmondás feltételei/korlátai:",options:["Lényeges kötelezettség jelentős megszegése","Olyan magatartás, ami a viszony fenntartását lehetetlenné teszi","Közlés: okról tudomásszerzéstől 15 napon belül","Bármikor, indoklás nélkül (kiv. próbaidő)"],correct:[0,1,2]}, // :contentReference[oaicite:21]{index=21}
+  {id:"mt-022",type:"mcq",multi:true, topic:"Munkajog",text:"Munkáltató kártérítési felelőssége mentesül, ha bizonyítja, hogy:",options:["A kár ellenőrzési körén kívüli, előre nem látható okból keletkezett","A kárt kizárólag a károsult elháríthatatlan magatartása okozta","Minden esetben vétkesség vizsgálata szükséges","Mindig mentesül, ha volt oktatás"],correct:[0,1]}, // :contentReference[oaicite:22]{index=22}
+  {id:"mt-023",type:"mcq",multi:false,topic:"Munkajog",text:"Munkajogi igények általános elévülési ideje:",options:["1 év","2 év","3 év","5 év"],correct:[2]}, // :contentReference[oaicite:23]{index=23}
+  {id:"mt-024",type:"mcq",multi:false,topic:"Munkajog",text:"Munkaerő-kölcsönzés lényege:",options:["A kölcsönbeadó a vele munkaviszonyban álló munkavállalót ideiglenesen a kölcsönvevőnek adja","Megbízási jogviszony létrehozása a kölcsönvevővel","Mindig határozott idejű szerződés a kölcsönvevővel","Nincs díjazás"],correct:[0]}, // :contentReference[oaicite:24]{index=24}
+  {id:"mt-025",type:"mcq",multi:false,topic:"Munkajog",text:"Távmunka fogalma:",options:["A munkát mindig a telephelyen végzik","A munkát a munkáltató telephelyétől elkülönült helyen végzik részben vagy egészben","Home office csak eseti jelleggel","Nincs szükség megállapodásra"],correct:[1]}, // :contentReference[oaicite:25]{index=25}
+  {id:"mt-026",type:"mcq",multi:false,topic:"Munkajog",text:"Készenléti jellegű munkakör esetén:",options:["A munka a teljes időben intenzív","A rendes munkaidő legalább harmadában rendelkezésre állás van","Nincs eltérés a pihenőidőben","Nem adható beosztás"],correct:[1]}, // :contentReference[oaicite:26]{index=26}
+  {id:"mt-027",type:"mcq",multi:true, topic:"Munkajog",text:"Munkarend, munkaidő-keret szabályok:",options:["Munkaidőkeret írásban rögzítendő és közzéteendő","A munkarendet a munkáltató határozza meg","Általános munkarend: hétfőtől péntekig","Munkaidő-keret bevezetését előre kell közölni"],correct:[0,1,2,3]}, // :contentReference[oaicite:27]{index=27}
+  {id:"mt-028",type:"mcq",multi:true, topic:"Munkajog",text:"Felmondási védelem fennáll többek között:",options:["Várandósság alatt","Szülési szabadság alatt","Gyermek gondozása miatti fizetés nélküli szabadság alatt","Önkéntes katonai szolgálat alatt"],correct:[0,1,2,3]}, // :contentReference[oaicite:28]{index=28}
+  {id:"mt-029",type:"mcq",multi:false,topic:"Munkajog",text:"Felmondási idő főszabály szerint:",options:["15 nap","30 nap","45 nap","60 nap"],correct:[1]}, // :contentReference[oaicite:29]{index=29}
+  {id:"mt-030",type:"mcq",multi:false,topic:"Munkajog",text:"Betegszabadság alapesetben:",options:["10 munkanap, 50% távolléti díj","15 munkanap, 70% távolléti díj","20 munkanap, 70% bér","15 munkanap, 100% bér"],correct:[1]}, // :contentReference[oaicite:30]{index=30}
+
+  {id:"mt-fill-01",type:"fill",topic:"Munkajog",text:"Az Mt. rövidítése: ________ (teljes név: 2012. évi I. törvény a munka ________).",correctText:["munka törvénykönyve","törvénykönyvéről","munka torvenykonyve","torvenykonyverol"]}, // :contentReference[oaicite:31]{index=31}
+  {id:"mt-fill-02",type:"fill",topic:"Munkajog",text:"A munkaszerződést ________ kell foglalni.",correctText:["írásba","irasba"]}, // :contentReference[oaicite:32]{index=32}
+  {id:"mt-fill-03",type:"fill",topic:"Munkajog",text:"Az éves alapszabadság mértéke: ________ nap.",correctText:["20","húsz","husz"]}, // :contentReference[oaicite:33]{index=33}
+  {id:"mt-fill-04",type:"fill",topic:"Munkajog",text:"A heti pihenőidő főszabály szerint megszakítás nélkül ________ óra.",correctText:["48","negyvennyolc"]}, // :contentReference[oaicite:34]{index=34}
+  {id:"mt-fill-05",type:"fill",topic:"Munkajog",text:"Az általános napi pihenőidő legalább ________ óra.",correctText:["11","tizenegy"]} // :contentReference[oaicite:35]{index=35}
+);
+QUESTION_BANK.push(
+  {id:"pj-001",type:"mcq",multi:true,topic:"Polgári jog – Kötelmi jog",text:"Melyek tartoznak a Ptk. szerződéstípusai közé?",options:["Ajándékozási","Bizományosi","Adásvételi","Csere","Kölcsön"],correct:[0,1,2,3]},
+  
+  {id:"gt-031",type:"mcq",multi:false,topic:"Társasági jog / Gt",text:"A gazdasági társaság az ellenjegyzés vagy közokiratba foglalásának napjától előtársaságként működhet.",options:["IGAZ","HAMIS"],correct:[0]},
+  
+  {id:"pj-002",type:"mcq",multi:true,topic:"Polgári jog – Személyek",text:"A Polgári Törvénykönyv szerint jogalany lehet:",options:["Természetes személy","Állam","Jogi személy","Jogi személyiséggel felruházott nem jogi személy"],correct:[0,1,2,3]},
+  
+  {id:"pj-003",type:"mcq",multi:false,topic:"Polgári jog – Kötelmi jog",text:"Az ajándékot az ajándékozó főszabályként visszakövetelheti.",options:["IGAZ","HAMIS"],correct:[1]},
+  
+  {id:"gt-032",type:"mcq",multi:true,topic:"Társasági jog / Gt",text:"Mi minősül társasági jogvitának?",options:[
+      "Gazdasági társaság és vezető tisztségviselője között fennálló jogvita",
+      "A tagok egymás közötti, társasági jogviszonyból eredő jogvita",
+      "A társaság és tagjai közötti, társasági jogviszonyból eredő vita",
+      "Gazdasági társaságok üzleti viszonyaikra vonatkozó jogvita",
+      "Gazdasági társaság és hitelezők közötti jogvita"
+    ],
+    correct:[0,1,2]
+  },
+  
+  {id:"dj-001",type:"mcq",multi:false,topic:"Dologi jog",text:"Származékos tulajdonszerzésnek minősül a csere, az öröklés vagy az adásvétel útján történő szerzés.",options:["IGAZ","HAMIS"],correct:[0]},
+  
+  {id:"koz-001",type:"mcq",multi:false,topic:"Közigazgatási jog / Eljárás",text:"A közigazgatási hatóság a hatáskörét és illetékességét csak az eljárás megkezdésekor vizsgálja.",options:["IGAZ","HAMIS"],correct:[1]},
+  
+  {id:"rt-009",type:"mcq",multi:true,topic:"Társasági jog / Rt.",text:"Milyen típusú részvényeket bocsáthat ki egy részvénytársaság?",options:[
+      "Elsőbbségi részvény",
+      "Kamatozó részvény",
+      "Dolgozói részvény",
+      "Törzsrészvény",
+      "Másodlagos részvény",
+      "Főrészvény"
+    ],correct:[0,1,2,3]},
+  
+  {id:"gt-033",type:"mcq",multi:false,topic:"Társasági jog / Szövetkezet",text:"A szövetkezet létesítő okiratát alapszabálynak nevezzük.",options:["IGAZ","HAMIS"],correct:[0]},
+  
+  {id:"pj-004",type:"mcq",multi:false,topic:"Polgári jog – Kötelmi jog",text:"Az elévülési idő számítása a szerződés aláírásától kezdődik.",options:["IGAZ","HAMIS"],correct:[1]},
+  
+  {id:"pj-005",type:"mcq",multi:false,topic:"Polgári jog – Jogi személyek",text:"A jogi személy létrehozásáról a személyek szerződésben, alapító okiratban vagy alapszabályban szabadon rendelkezhetnek, és szervezetét, működési szabályait maguk állapítják meg.",options:["IGAZ","HAMIS"],correct:[0]},
+  
+  {id:"bj-001",type:"mcq",multi:false,topic:"Büntetőjog / Munkajog",text:"A közmunka egy büntetési nem.",options:["IGAZ","HAMIS"],correct:[1]}
+);
+// --- Új kérdések (forrás: Jogi alapok + Gt + Ptk. szövegbeillesztős feladatok) ---
+QUESTION_BANK.push(
+  // Jogforrások – hivatalos lapok
+  {id:"ja-100",type:"mcq",multi:true,topic:"Jogi alapok",text:"Az alábbiak közül melyek NEM tartoznak a jogszabályok megismerését szolgáló hivatalos lapok közé?",options:[
+      "Internetes Jogtár",
+      "Nemzeti Jogszabálytár",
+      "Magyar Közlöny",
+      "Tárcaközlönyök"
+    ],correct:[0]},
+  
+  // Joggal szembeni követelmények
+  {id:"ja-101",type:"mcq",multi:true,topic:"Jogi alapok",text:"Jelölje meg, hogy milyen követelményeket támasztanak a joggal szemben!",options:[
+      "Legyen általános",
+      "Ki kell hirdetni",
+      "Ne tartalmazzon ellentmondásokat",
+      "Legyen egyszerű"
+    ],correct:[0,1,2]},
+  
+  // Jogi személy jogutód nélküli megszűnés
+  {id:"gt-040",type:"mcq",multi:true,topic:"Társasági jog / Jogi személy",text:"Jelölje meg, hogy a jogi személy jogutód nélküli megszűnésének esetei közül melyek helyesek!",options:[
+      "A tagok vagy alapítók kimondják megszűnését",
+      "Az arra jogosult szerv megszünteti",
+      "Különválás",
+      "Változásbejegyzési eljárás okán"
+    ],correct:[0,1]},
+  
+  // Gazdasági társaság alapítása – szövegbeillesztős
+  {id:"gt-041",type:"fill",topic:"Társasági jog / Gt",text:"A gazdasági társaságok főbb szerveinek száma 4. A legfőbb szerv a ________, míg az ügyvezetést az ________ végzi. A társaságok alapítása ________ történik, amelyet a ________-hoz kell benyújtani. Amíg a bejegyzés meg nem történik, a társaság ________ működik, nevében „b.a.” toldattal.",correctText:[
+    "taggyűlés, operatív irányítás, létesítő okirattal, cégbíróság, előtársaságként",
+    "taggyűlés, ügyvezetés, létesítő okirattal, cégbíróság, előtársaságként",
+    "taggyűlés, ügyvezetés, alapító okirattal, cégbíróság, előtársaságként"
+  ]},
+  
+  // Gt – jellemzők
+  {id:"gt-042",type:"mcq",multi:true,topic:"Társasági jog / Gt",text:"Jelölje meg, mely jellemzők igazak a gazdasági társaságokra!",options:[
+      "Állandó szervezet",
+      "Alapítóktól, tulajdonosoktól elkülönült vagyon",
+      "Korlátozott cselekvőképesség",
+      "Állami elismerés szükséges",
+      "Tulajdonos(ok) teljes felelőssége"
+    ],correct:[0,1,3]},
+  
+  // Ptk. – jogképesség és cselekvőképesség
+  {id:"pj-010",type:"fill",topic:"Polgári jog / Személyek",text:"A Ptk. – ugyanúgy, mint az Alaptörvény – kijelenti, hogy minden ember jogképes, azaz ________ kötelezettségei lehetnek. Az ember jogképessége általános, egyenlő és feltétlen, a ________ esetében általános, egyenlő, de feltételhez kötött. Az ember jogképessége a ________ véglegesen és visszavonhatatlanul szűnik meg.",correctText:[
+    "jogi, magzat, halálával",
+    "jogi, magzat, halálával szűnik meg"
+  ]},
+  
+  {id:"pj-011",type:"fill",topic:"Polgári jog / Személyek",text:"Nevezzük az embernek azt a képességét, hogy saját nevében jognyilatkozatot tehet, azaz jogokat szerezhet és kötelezettségeket vállalhat: ________. Ez lehet ________, akár életkor, akár szellemi fogyatékosság miatt.",correctText:[
+    "cselekvőképesség, korlátozott",
+    "cselekvőképességnek, korlátozott"
+  ]}
+);
+QUESTION_BANK.push(
+  {
+    id: "ja-102",
+    type: "mcq",
+    multi: true,
+    topic: "Jogi alapok / Jogforrások",
+    text: "Jelölje meg, hogy az alábbi elemek közül mely vagy melyek számítanak külső (alaki) jogforrásnak!",
+    options: [
+      "Rendelet",
+      "Törvény",
+      "Törvényerejű rendelet",
+      "Országgyűlés",
+      "Kormány"
+    ],
+    correct: [0, 1, 2]
+  }
+);
+
+
+
+/* ======= Segédfüggvények ======= */
+const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+const pickRandom = (arr, n) => shuffle(arr).slice(0, n);
+const normalize = s => (s||"").toString().trim().toLowerCase()
+  .replaceAll("á","a").replaceAll("é","e").replaceAll("í","i").replaceAll("ó","o").replaceAll("ö","o").replaceAll("ő","o")
+  .replaceAll("ú","u").replaceAll("ü","u").replaceAll("ű","u");
+
+/* ======= Állapot ======= */
+let currentSet = [];
+let score = 0;
+let answered = 0;
+
+/* ======= UI render ======= */
+const testContainer = document.getElementById('testContainer');
+const resultCard = document.getElementById('resultCard');
+const scoreLine = document.getElementById('scoreLine');
+const detailLine = document.getElementById('detailLine');
+
+function renderTest(questions){
+  testContainer.innerHTML = "";
+  resultCard.classList.add('hidden');
+  score = 0; answered = 0;
+
+  questions.forEach((q, idx)=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = `q-${q.id}`;
+
+    const header = document.createElement('div');
+    header.innerHTML = `<div class="row" style="justify-content:space-between">
+      <div><span class="pill">${idx+1}. kérdés</span> <span class="tag">${q.topic||""}</span></div>
+      <div class="meta">${q.type==="mcq" ? (q.multi? "Több válasz lehetséges":"Egy válasz") : "Kitöltős"}</div>
+    </div>`;
+    card.appendChild(header);
+
+    const qDiv = document.createElement('div');
+    qDiv.className = 'q';
+    qDiv.textContent = q.text;
+    card.appendChild(qDiv);
+
+    let answersWrap = document.createElement('div');
+    if(q.type === "mcq"){
+      // options
+      (q.options||[]).forEach((opt, i)=>{
+        const optDiv = document.createElement('label');
+        optDiv.className = 'opt';
+        const input = document.createElement('input');
+        input.type = q.multi ? 'checkbox' : 'radio';
+        input.name = `ans-${q.id}`;
+        input.value = i;
+        optDiv.appendChild(input);
+        const span = document.createElement('span');
+        span.textContent = " " + ["A)","B)","C)","D)","E)","F)"][i] + " " + opt;
+        optDiv.appendChild(span);
+        answersWrap.appendChild(optDiv);
+      });
+    }else if(q.type==="fill"){
+      const input = document.createElement('input');
+      input.type = "text";
+      input.placeholder = "Írd be a megoldást…";
+      input.id = `fill-${q.id}`;
+      answersWrap.appendChild(input);
+    }
+    card.appendChild(answersWrap);
+
+    const footer = document.createElement('div');
+    footer.className = 'footer';
+    footer.innerHTML = `<div class="meta" id="fb-${q.id}"> </div>
+      <div class="row">
+        <button class="btn small ghost" data-action="show-solution" data-qid="${q.id}">Megoldás mutatása</button>
+        <button class="btn small" data-action="check" data-qid="${q.id}">Ellenőrzés</button>
+      </div>`;
+    card.appendChild(footer);
+
+    testContainer.appendChild(card);
+  });
+
+  
+  testContainer.addEventListener('click', onCardClick);
+}
+
+function onCardClick(ev){
+  const btn = ev.target.closest('button');
+  if(!btn) return;
+  const qid = btn.getAttribute('data-qid');
+  const action = btn.getAttribute('data-action');
+  const q = currentSet.find(x=>x.id===qid);
+  if(!q) return;
+
+  if(action === "check"){
+    handleCheck(q);
+  }else if(action === "show-solution"){
+    showSolution(q, revealOnly=true);
+  }
+}
+
+function handleCheck(q){
+  const card = document.getElementById(`q-${q.id}`);
+  const fb = document.getElementById(`fb-${q.id}`);
+
+  let isCorrect = false;
+
+  if(q.type==="mcq"){
+    const inputs = [...card.querySelectorAll('input[name="ans-'+q.id+'"]')];
+    const sel = inputs.filter(i=>i.checked).map(i=>parseInt(i.value,10));
+    // jelölés
+    inputs.forEach(i=>{
+      const wrap = i.parentElement;
+      const idx = parseInt(i.value,10);
+      const good = q.correct.includes(idx);
+      wrap.classList.remove('correct','incorrect');
+      if(good) wrap.classList.add('correct');
+      if(i.checked && !good) wrap.classList.add('incorrect');
+      i.disabled = true;
+    });
+    // helyesség
+    sel.sort((a,b)=>a-b);
+    const corr = [...q.correct].sort((a,b)=>a-b);
+    isCorrect = JSON.stringify(sel)===JSON.stringify(corr);
+
+  }else if(q.type==="fill"){
+    const input = card.querySelector('input[type="text"]');
+    const given = normalize(input.value);
+    const ok = (q.correctText||[]).some(acc=>normalize(acc)===given);
+    isCorrect = ok;
+    input.disabled = true;
+    if(ok){
+      input.style.borderColor = "rgba(16,185,129,.8)";
+      input.style.background = "rgba(16,185,129,.08)";
+    }else{
+      input.style.borderColor = "rgba(239,68,68,.8)";
+      input.style.background = "rgba(239,68,68,.08)";
+      // megoldás megjelenítése
+      const sol = "Megoldás: " + (q.correctText||[]).join("  |  ");
+      const solDiv = document.createElement('div');
+      solDiv.className = 'meta';
+      solDiv.textContent = sol;
+      input.insertAdjacentElement('afterend', solDiv);
+    }
+  }
+
+  // visszajelzés + pontszám
+  fb.textContent = isCorrect ? "✅ Helyes válasz! +1 pont" : "❌ Nem teljesen jó.";
+  if(!card.dataset.done){
+    answered++;
+    if(isCorrect) score++;
+    card.dataset.done = "1";
+  }
+
+  if(answered === currentSet.length){
+    finalizeScore();
+  }
+}
+
+function showSolution(q, revealOnly=false){
+  const card = document.getElementById(`q-${q.id}`);
+  const fb = document.getElementById(`fb-${q.id}`);
+  if(q.type==="mcq"){
+    const inputs = [...card.querySelectorAll('input[name="ans-'+q.id+'"]')];
+    inputs.forEach(i=>{
+      const wrap = i.parentElement;
+      const idx = parseInt(i.value,10);
+      const good = q.correct.includes(idx);
+      wrap.classList.remove('correct','incorrect');
+      if(good) wrap.classList.add('correct');
+      if(!revealOnly) i.disabled = true;
+    });
+    fb.textContent = "Megoldás kiemelve zölddel.";
+  }else if(q.type==="fill"){
+    const input = card.querySelector('input[type="text"]');
+    input.disabled = true;
+    const sol = "Megoldás: " + (q.correctText||[]).join("  |  ");
+    const solDiv = document.createElement('div');
+    solDiv.className = 'meta';
+    solDiv.textContent = sol;
+    input.insertAdjacentElement('afterend', solDiv);
+    fb.textContent = "Megoldás megjelenítve.";
+  }
+}
+
+function finalizeScore(){
+  resultCard.classList.remove('hidden');
+  scoreLine.textContent = `Pontszám: ${score} / ${currentSet.length}`;
+  const pct = Math.round((score/currentSet.length)*100);
+  detailLine.textContent = `Teljesítmény: ${pct}% • Helyes válasz után zöld keret, hibás után piros.`;
+}
+
+/* ======= Vezérlőgombok ======= */
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  currentSet = pickRandom(QUESTION_BANK, 20);
+  renderTest(currentSet);
+});
+
+document.getElementById('showAllBtn').addEventListener('click', ()=>{
+  currentSet = [...QUESTION_BANK]; // összes tanuláshoz
+  renderTest(currentSet);
+});
+
+document.getElementById('restartBtn')?.addEventListener('click', ()=>{
+  currentSet = pickRandom(QUESTION_BANK, 20);
+  renderTest(currentSet);
+});
+
+document.getElementById('reviewBtn')?.addEventListener('click', ()=>{
+  currentSet.forEach(q=>showSolution(q,true));
+});
+
+
+(() => {
+  const tip = document.createElement('div');
+  tip.className = 'card';
+  tip.innerHTML = `<div class="h2">Használati tippek</div>
+  <ul class="meta">
+    <li>Kattints az <b>Új teszt indítása</b> gombra – 20 kérdés véletlenszerűen.</li>
+    <li>Minden kérdésnél nyomd meg az <b>Ellenőrzés</b> gombot – azonnali visszajelzés.</li>
+    <li>A végén megjelenik az <b>összpontszám</b>.</li>
+    <li>A <b>Megoldás mutatása</b> gombbal tanuló módban is haladhatsz.</li>
+    <li>Bővítéshez szerkeszd a <span class="kbd">QUESTION_BANK</span> tömböt a fájl alján.</li>
+  </ul>`;
+  document.getElementById('testContainer').appendChild(tip);
+})();
+</script>
+</body>
+</html>
