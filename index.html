@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Gazdjog gyakorló teszt</title>
+<title>Gazdjog gyakorló teszt – minimal</title>
 <style>
   :root{
     --bg:#0f172a; --card:#111827; --muted:#9ca3af; --ok:#10b981; --err:#ef4444; --pri:#60a5fa;
@@ -27,13 +27,11 @@
   .opt.correct{border-color:rgba(16,185,129,.6);background:rgba(16,185,129,.08)}
   .opt.incorrect{border-color:rgba(239,68,68,.6);background:rgba(239,68,68,.08)}
   .pill{display:inline-block;background:var(--chip);border:1px solid #334155;color:var(--ink2);font-size:12px;border-radius:999px;padding:3px 9px;margin-right:6px}
-  .kbd{background:#0b1220;border:1px solid #334155;border-bottom-color:#1f2937;border-radius:6px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace}
   .footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;border-top:1px dashed #334155;padding-top:10px}
   input[type="text"]{width:100%;padding:10px;border-radius:10px;border:1px solid #1f2937;background:#0b1220;color:var(--ink)}
   .score{font-size:18px;font-weight:800}
   .tag{font-size:12px;color:#93c5fd}
   .hidden{display:none}
-  /* --- ÚJ: Tab jellegű gombsor jelölése --- */
   .tabs .btn.active{border-color:#1e3a8a; background:#0c1a33}
   .list-item{padding:8px;border-bottom:1px dashed #334155}
 </style>
@@ -42,58 +40,74 @@
 <div class="wrap">
   <div class="card">
     <div class="h1">Gazdjog gyakorló teszt</div>
-    <div class="meta"></div>
     <div class="row tabs" style="margin-top:10px">
-      <button id="startBtn" class="btn primary">Új teszt indítása (20 véletlen kérdés)</button>
-      <button id="showAllBtn" class="btn ghost">Összes kérdés listázása (tanuláshoz)</button>
-      <!-- ÚJ: Hibáim fül -->
+      <button id="startBtn" class="btn primary" type="button">Új teszt indítása (20 véletlen kérdés)</button>
+      <button id="showAllBtn" class="btn ghost" type="button">Összes kérdés listázása (tanuláshoz)</button>
+      <button id="unseenTabBtn" class="btn ghost" type="button">Még nem tanult kérdéseim</button>
       <button id="mistakesTabBtn" class="btn ghost" type="button">Hibáim (rossz válaszok)</button>
-      <br />
-      <br><br>
     </div>
   </div>
 
   <div id="testContainer"></div>
 
   <div id="resultCard" class="card hidden">
-  <div class="h1">Eredmény</div>
-  <div id="scoreLine" class="score"></div>
-  <div id="detailLine" class="meta" style="margin-top:6px"></div>
-  <div class="row" style="margin-top:12px; flex-wrap:wrap; gap:10px;">
-    <button class="btn primary" id="restartBtn">Új, véletlen 20 kérdés</button>
-    <button class="btn" id="reviewBtn">Összes (aktuális) kérdés megoldásának mutatása</button>
-    <button class="btn ghost" id="resultPracticeMistakesBtn">Hibáim tanulása (10 véletlen kérdés)</button>
+    <div class="h1">Eredmény</div>
+    <div id="scoreLine" class="score"></div>
+    <div id="detailLine" class="meta" style="margin-top:6px"></div>
+    <div class="row" style="margin-top:12px; flex-wrap:wrap; gap:10px;">
+      <button class="btn primary" id="restartBtn" type="button">Új, véletlen 20 kérdés</button>
+      <button class="btn" id="reviewBtn" type="button">Összes (aktuális) kérdés megoldásának mutatása</button>
+      <button class="btn ghost" id="resultPracticeMistakesBtn" type="button">Hibáim tanulása ()</button>
+    </div>
   </div>
-</div>
-
 
   <div id="bulkCard" class="card hidden">
-  <div class="h2">Gyors ellenőrzés és gyakorlás</div>
-  <div class="meta">
-    Ezekkel a gombokkal egy kattintással ellenőrizheted az összes kérdést, vagy újratanulhatod a hibáidat.
+    <div class="h2">Gyors ellenőrzés és gyakorlás</div>
+    <div class="meta">Ezekkel gyorsan újratanulhatod a hibáidat.</div>
+    <div class="row" style="margin-top:10px; flex-wrap:wrap; gap:12px;">
+      <button class="btn ghost" id="practiceMistakesBtn" type="button">Hibáim tanulása (10 véletlen kérdés)</button>
+      <button class="btn" id="practiceMistakesAll" type="button">Összes hibám gyakorlása</button>
+    </div>
   </div>
-  <div class="row" style="margin-top:10px; flex-wrap:wrap; gap:12px;">
-    <button class="btn" id="practiceMistakesAll">Összes ellenőrzése most</button>
-    <button class="btn ghost" id="practiceMistakesBtn">Hibáim tanulása (10 véletlen kérdés)</button>
-  </div>
-</div>
 
-  <!-- ÚJ: Hibáim nézet -->
+  <!-- Hibáim -->
   <div id="mistakesCard" class="card hidden">
     <div class="h2">Hibáim – gyakorló lista</div>
     <div class="meta" id="mistakesMeta">Még nincs rögzített hibád.</div>
     <div class="row" style="margin:10px 0">
-      <button id="practiceMistakes10" class="btn">Gyakorlás a hibáimból (10)</button>
-      <button id="practiceMistakes20" class="btn">Gyakorlás a hibáimból (20)</button>
-      <button id="clearMistakesBtn" class="btn ghost">Hibalista törlése</button>
+      <button id="practiceMistakes10" class="btn" type="button">Gyakorlás a hibáimból (10)</button>
+      <button id="practiceMistakes20" class="btn" type="button">Gyakorlás a hibáimból (20)</button>
+      <button id="clearMistakesBtn" class="btn ghost" type="button">Hibalista törlése</button>
     </div>
     <div id="mistakesList"></div>
   </div>
 
-  
+  <!-- Még nem tanult -->
+  <div id="unseenCard" class="card hidden">
+    <div class="h2">Még nem tanult kérdéseim</div>
+    <div class="meta" id="unseenMeta">Betöltés…</div>
+    <div class="row" style="margin:10px 0">
+      <button id="practiceUnseen10" class="btn" type="button">Gyakorlás (10 véletlen)</button>
+      <button id="practiceUnseen20" class="btn" type="button">Gyakorlás (20 véletlen)</button>
+      <button id="clearSeenBtn" class="btn ghost" type="button">„Megnézettek” törlése</button>
+    </div>
+    <div id="unseenList"></div>
+  </div>
 </div>
 
 <script>
+/* ======================== KIS ALAP – KÉRDÉSEK (MINTA) ========================
+   >>> IDE TÖLTSD BE A KÉRDÉSEIDET <<<
+
+   Formátum:
+   - MCQ (egyválaszos/többválaszos):
+     { id:"x-001", type:"mcq", multi:false, topic:"Téma", text:"Kérdés?",
+       options:["A","B","C","D"], correct:[2] }
+
+   - Kitöltős:
+     { id:"x-100", type:"fill", topic:"Téma", text:"A jog legfőbb forrása az ________.",
+       correctText:["Alaptörvény","alaptörvény"] }
+*/
 const QUESTION_BANK = [
   // --- RÖVID KÉRDÉSEK – MCQ (egyválaszos / többválaszos) ---
   {id:"ja-001",type:"mcq",multi:false,topic:"Jogi alapok",text:"Mit jelent a „jogforrás” kifejezés?",options:["A jogszabály eredete, kibocsátója","A bírói döntés tartalma","A törvények tárgya","Az erkölcsi elvek összessége"],correct:[0]},
@@ -529,11 +543,418 @@ QUESTION_BANK.push(
     correct:[0,1,2,4]
   }
 );
+QUESTION_BANK.push(
+  // Dologi jog – tulajdonjog és elbirtoklás, kisajátítás
+  { id:"dj-201", type:"mcq", multi:false, topic:"Dologi jog", text:"A szolgalom nem tartozik a tulajdonjogi részjogosítványok közé.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"dj-202", type:"mcq", multi:false, topic:"Dologi jog / Elbirtoklás", text:"Jelölje meg, hogy az alábbi állításokból az ingatlan elbirtoklási idejére melyik igaz!", options:["5 év","15 év","10 év"], correct:[1] },
+  { id:"dj-203", type:"mcq", multi:true,  topic:"Dologi jog / Kisajátítás", text:"Jelölje meg az ingatlan tulajdonjogának kisajátításával kapcsolatos feltételeket!", options:["miniszteri jóváhagyáshoz kötött","közérdekű célra történhet","azonnali, teljes és feltétlen kártalanítás mellett történhet","kivételes esetben történhet"], correct:[1,2,3] },
+  { id:"dj-204", type:"mcq", multi:false, topic:"Dologi jog / Kisajátítás", text:"Az ingatlan tulajdonjogának kisajátításához a miniszter jóváhagyása szükséges.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"dj-205", type:"mcq", multi:false, topic:"Öröklés", text:"Az örökléshez való jog 5 év elteltével elévül.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"dj-206", type:"mcq", multi:false, topic:"Dologi jog", text:"A haszonélvezet nem tartozik a tulajdonjog részjogosítványai közé.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"dj-207", type:"mcq", multi:false, topic:"Dologi jog", text:"A találás tulajdonszerzési jogcím.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"dj-208", type:"mcq", multi:false, topic:"Dologi jog / Elbirtoklás", text:"Az ingatlan elbirtoklási ideje 5 év.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"dj-209", type:"mcq", multi:true,  topic:"Dologi jog / Tulajdonjog", text:"Jelölje meg a tulajdonjog részjogosítványait!", options:["rendelkezési jog","birtoklás joga","hasznok szedésének joga","szolgalom","használat joga"], correct:[0,1,2,4] },
 
-  /* --- a te kérdéslistád marad --- */
+  // Közjog – törvénykezdeményezés, AB, önkormányzat, jogforrások
+  { id:"kj-301", type:"mcq", multi:true,  topic:"Közjog / Törvénykezdeményezés", text:"Jelölje meg a törvény kezdeményezésére jogosultakat!", options:["Bármely országgyűlési képviselő","Legfőbb Ügyész","Kormány","Köztársasági Elnök","Országgyűlési Bizottság"], correct:[0,2,3,4] },
+  { id:"kj-302", type:"mcq", multi:false, topic:"Közjog / Alkotmánybíróság", text:"Az Alkotmánybíróság törvényalkotásra jogosult.", options:["Hamis","Igaz"], correct:[0] },
+  { id:"kj-303", type:"mcq", multi:false, topic:"Közjog / Törvénykezdeményezés", text:"A legfőbb ügyész jogosult törvényt kezdeményezni.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kj-304", type:"mcq", multi:false, topic:"Közjog / Helyi adók", text:"A helyi adók fajtájáról és mértékéről való döntés, a Kormány feladata.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kj-305", type:"mcq", multi:true,  topic:"Önkormányzati jog", text:"Jelölje meg az önkormányzat feladatkörébe tartozó funkciókat!", options:["törvény módosításának kezdeményezése az Országgyűlésben","a helyi adók fajtájáról és mértékéről való döntés","önkormányzati jelképek alkotása","érdek-képviseleti szövetség létrehozása"], correct:[1,2,3] },
+  { id:"kj-306", type:"mcq", multi:false, topic:"Közjog / Alkotmánybíróság", text:"Az Alkotmánybíróság a rendes bírósági szervezetrendszer legmagasabb szintű fórumaként, egyedi jogvita eldöntésére jogosult.", options:["Hamis","Igaz"], correct:[0] },
+  { id:"kj-307", type:"mcq", multi:false, topic:"Jogforrások", text:"A normatív rendelet jogszabálynak minősül.", options:["Hamis","Igaz"], correct:[1] },
+  { id:"kj-308", type:"mcq", multi:false, topic:"Igazságszolgáltatás", text:"Melyik szerv nem része az igazságszolgáltatási szervezetrendszernek Magyarországon?", options:["Kúria","Alkotmánybíróság","Megyei Törvényszékek","Ítélőtáblák","Járási Bíróságok"], correct:[1] },
+  { id:"kj-309", type:"mcq", multi:false, topic:"Jogtechnika", text:"A hipotézis a jogi norma része.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kj-310", type:"mcq", multi:false, topic:"Közjog / Közkegyelem", text:"A közkegyelem gyakorlása az Országgyűlés feladatkörébe tartozó funkció.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kj-311", type:"mcq", multi:false, topic:"Önkormányzati jog", text:"A településrendezés és a településfejlesztés helyi önkormányzati feladatnak minősülnek.", options:["Hamis","Igaz"], correct:[1] },
+  { id:"kj-312", type:"mcq", multi:false, topic:"Államszervezet", text:"A Miniszterelnököt a Köztársasági elnök nevezi ki.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kj-313", type:"mcq", multi:false, topic:"Jogforrások", text:"A közjogi szervezetszabályozó eszközök jogforrásnak minősülnek.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kj-314", type:"mcq", multi:false, topic:"Jogforrások", text:"A közjogi szervezetszabályozó eszközök jogszabálynak minősülnek.", options:["Hamis","Igaz"], correct:[0] },
+  { id:"kj-315", type:"mcq", multi:false, topic:"Jogforrások", text:"A rendelet külső/alaki jogforrás.", options:["Hamis","Igaz"], correct:[1] },
+  { id:"kj-316", type:"mcq", multi:false, topic:"Igazságszolgáltatás", text:"A megyei törvényszékek a magyar igazságszolgáltatási rendszer részei.", options:["Hamis","Igaz"], correct:[1] },
+  { id:"kj-317", type:"mcq", multi:false, topic:"Közjog / Törvénykezdeményezés", text:"Az országgyűlési bizottság nem jogosult törvényt kezdeményezni.", options:["Igaz","Hamis"], correct:[1] }
+);
 
+QUESTION_BANK.push(
+  // Jogi alapfogalmak
+  {
+    id:"kb-401",
+    type:"mcq",
+    multi:false,
+    topic:"Jogi alapfogalmak",
+    text:"A közjogi szervezetszabályozó eszközök jogszabálynak minősülnek.",
+    options:["IGAZ","HAMIS"],
+    correct:[1]
+  },
 
-/* ======= Segédfüggvények ======= */
+  // Ptk. – Személyek joga, személyiségi jogok
+  {
+    id:"kb-402",
+    type:"mcq",
+    multi:false,
+    topic:"Ptk. – Személyek joga, személyiségi jogok",
+    text:"Az állam lehet polgári jogi jogalany.",
+    options:["IGAZ","HAMIS"],
+    correct:[0]
+  },
+  {
+    id:"kb-403",
+    type:"mcq",
+    multi:false,
+    topic:"Ptk. – Személyek joga, személyiségi jogok",
+    text:"Írásbeli végrendelet útján lehet alapítványt alapítani.",
+    options:["IGAZ","HAMIS"],
+    correct:[0]
+  },
+
+  // DOLOGI JOG
+  {
+    id:"kb-404",
+    type:"mcq",
+    multi:false,
+    topic:"Dologi jog",
+    text:"A zálog az adásvételi szerződés speciális alakzata.",
+    options:["IGAZ","HAMIS"],
+    correct:[1]
+  },
+  {
+    id:"kb-405",
+    type:"mcq",
+    multi:false,
+    topic:"Dologi jog – Birtokvédelem",
+    text:"A birtokvédelemnek kivételesen sem lehet eszköze az önhatalom.",
+    options:["IGAZ","HAMIS"],
+    correct:[1]
+  },
+
+  // A gazdasági élet szereplői (gazdasági társaságok)
+  {
+    id:"kb-406",
+    type:"mcq",
+    multi:false,
+    topic:"Gazdasági társaságok – általános",
+    text:"A felszámolás és a végelszámolás azonos fogalmak.",
+    options:["IGAZ","HAMIS"],
+    correct:[1]
+  },
+  {
+    id:"kb-407",
+    type:"mcq",
+    multi:false,
+    topic:"Gazdasági társaságok – részvényesi jogok",
+    text:"A vagyoni hozzájárulás a részvényesi jogok közé tartozó jogintézmény.",
+    options:["IGAZ","HAMIS"],
+    correct:[1]
+  },
+  {
+    id:"kb-408",
+    type:"mcq",
+    multi:false,
+    topic:"Gazdasági társaságok – átalakulás",
+    text:"Szövetkezet átalakulhat Zártkörűen működő részvénytársasággá.",
+    options:["IGAZ","HAMIS"],
+    correct:[0]
+  },
+  {
+    id:"kb-409",
+    type:"mcq",
+    multi:false,
+    topic:"Gazdasági társaságok – cégeljárás",
+    text:"A gazdasági társaságok bejegyzését a székhely szerint illetékes közigazgatási bíróságok végzik.",
+    options:["IGAZ","HAMIS"],
+    correct:[1]
+  },
+
+  // A munkaviszony létesítése és a munkavégzés szabályai
+  {
+    id:"kb-410",
+    type:"mcq",
+    multi:false,
+    topic:"Munkajog – atipikus munkaviszonyok",
+    text:"A bedolgozói munkaviszony atipikus szerződés.",
+    options:["IGAZ","HAMIS"],
+    correct:[0]
+  }
+);
+// --- JOGI ALAPFOGALMAK (Jogi alapok) ---
+QUESTION_BANK.push(
+  {id:"pdf-ja-101",type:"mcq",multi:false,topic:"Jogi alapok",text:"A szokásjog abban tér el az írott jogtól, hogy nincs leírva.",options:["Igaz","Hamis"],correct:[0]},
+  {id:"pdf-ja-102",type:"mcq",multi:false,topic:"Jogi alapok",text:"Vélelemnek nevezzük, amikor a jog egy valószínűsíthető tényt valósnak tekint.",options:["Igaz","Hamis"],correct:[0]},
+  {id:"pdf-ja-103",type:"mcq",multi:false,topic:"Jogi alapok",text:"A jogforrási hierarchia csúcsán a sarkalatos törvények állnak.",options:["Igaz","Hamis"],correct:[1]},
+  {id:"pdf-ja-104",type:"mcq",multi:false,topic:"Jogi alapok",text:"Ha a törvény ellentmondásban van a rendelettel, a rendeletet kell alkalmazni.",options:["Igaz","Hamis"],correct:[1]},
+  {id:"pdf-ja-105",type:"mcq",multi:true, topic:"Jogi alapok",text:"Milyen hatályossága lehet egy jogszabálynak?",options:["Területi","Időbeli","Másodlagos","Szervi"],correct:[0,1,3]}
+);
+// --- PTK – SZEMÉLYEK JOGA / SZEMÉLYISÉGI JOGOK ---
+QUESTION_BANK.push(
+  {id:"pdf-pj-201",type:"mcq",multi:false,topic:"Polgári jog – Személyek",text:"Az ember jogképessége csak a halálával szűnik meg.",options:["Igaz","Hamis"],correct:[0]},
+  {id:"pdf-pj-202",type:"mcq",multi:true, topic:"Polgári jog – Személyek",text:"Mitől függ a cselekvőképesség?",options:["Nem","Kor","Származás","Elmeállapot"],correct:[1,3]},
+  {id:"pdf-pj-203",type:"mcq",multi:false,topic:"Polgári jog – Személyek",text:"Mikortól kezdődik a teljes jogképesség?",options:["Élveszületéstől","Fogantatástól","14. életévtől","18. életévtől"],correct:[0]},
+  {id:"pdf-pj-204",type:"mcq",multi:true, topic:"Polgári jog – Személyek",text:"Milyen személyeket ismer a polgári jog?",options:["Jogi személy","Állam","Önkormányzati személy","Természetes személy"],correct:[0,1,3]},
+  {id:"pdf-pj-205",type:"mcq",multi:true, topic:"Polgári jog – Alapok",text:"Melyek a polgári jogviszony elemei?",options:["Alany","Tárgy","Tartalom","Joghatóság"],correct:[0,1,2]}
+);
+// --- DOLOGI JOG (birtok, tulajdon, korlátolt dologi jogok) ---
+QUESTION_BANK.push(
+  {id:"pdf-dj-301",type:"mcq",multi:false,topic:"Dologi jog",text:"A kisajátítás egyetlen feltétele, hogy közérdekből történjen.",options:["Igaz","Hamis"],correct:[1]},
+  {id:"pdf-dj-302",type:"mcq",multi:false,topic:"Dologi jog",text:"Az elbirtoklás főszabály szerint 5 év.",options:["Igaz","Hamis"],correct:[1]},
+  {id:"pdf-dj-303",type:"mcq",multi:true, topic:"Dologi jog",text:"Melyek a kisajátítás törvényi feltételei?",options:["Kivételesen","Közérdekű célra","Azonnali, teljes és feltétlen kártalanítás mellett","Miniszteri jóváhagyással"],correct:[0,1,2]},
+  {id:"pdf-dj-304",type:"mcq",multi:true, topic:"Dologi jog",text:"Mi tartozik a tulajdonjog tartalmát képező jogosultságok közé?",options:["Haszonélvezet","Birtoklás","Használat","Kárveszély viselése","Rendelkezés a tulajdonnal"],correct:[1,2,4]},
+  {id:"pdf-dj-305",type:"mcq",multi:true, topic:"Dologi jog",text:"Melyek korlátolt dologi jogok?",options:["Szolgalom","Zálogjog","Haszonélvezet","Birtoklás"],correct:[0,1,2]}
+);
+// --- GAZDASÁGI ÉLET SZEREPLŐI / GAZDASÁGI TÁRSASÁGOK ---
+QUESTION_BANK.push(
+  {id:"pdf-gt-401",type:"mcq",multi:false,topic:"Jogi személy / Gt",text:"A gazdasági társaságok tekintetében formakényszer érvényesül.",options:["Igaz","Hamis"],correct:[0]},
+  {id:"pdf-gt-402",type:"mcq",multi:false,topic:"Jogi személy / Gt",text:"A bt. és a kkt. nem jogi személy.",options:["Igaz","Hamis"],correct:[1]},
+  {id:"pdf-gt-403",type:"mcq",multi:false,topic:"Jogi személy / Gt",text:"Nyrt-t nem lehet alapítani, csak Zrt-ből alakulhat át.",options:["Igaz","Hamis"],correct:[0]},
+  {id:"pdf-gt-404",type:"mcq",multi:false,topic:"Jogi személy / Gt",text:"Minden gazdasági társaságot a Cégbíróság vesz nyilvántartásba.",options:["Igaz","Hamis"],correct:[0]},
+  {id:"pdf-gt-405",type:"mcq",multi:false,topic:"Cégeljárás",text:"Az egyéni vállalkozásról szóló törvény (Evc.) hatálya kiterjed valamennyi vállalkozóra.",options:["Igaz","Hamis"],correct:[0]}
+);
+// --- MUNKAJOG (létesítés és munkavégzés szabályai) ---
+QUESTION_BANK.push(
+  {id:"pdf-mt-501",type:"mcq",multi:false,topic:"Munkajog",text:"A munkaviszony lehet tipikus és atipikus is.",options:["Igaz","Hamis"],correct:[0]},
+  {id:"pdf-mt-502",type:"mcq",multi:false,topic:"Munkajog",text:"A felek legfeljebb 3 hónap próbaidőt köthetnek ki (ha a KSZ másként nem rendelkezik).",options:["Igaz","Hamis"],correct:[0]},
+  {id:"pdf-mt-503",type:"mcq",multi:true, topic:"Munkajog",text:"A munkaszerződés kötelező elemei:",options:["Felek megnevezése és lényeges adatai","Versenytilalmi megállapodás","Alapbér","Munkakör"],correct:[0,2,3]},
+  {id:"pdf-mt-504",type:"mcq",multi:true, topic:"Munkajog",text:"Mi minősül atipikus munkaviszonynak?",options:["Bedolgozói jogviszony","Távmunka","Rendes (teljes munkaidős) munkaviszony","Munkaerő-kölcsönzés"],correct:[0,1,3]},
+  {id:"pdf-mt-505",type:"mcq",multi:false,topic:"Munkajog",text:"Azonnali hatályú felmondás akkor jogszerű, ha a másik fél lényeges kötelezettségét szándékosan vagy súlyos gondatlansággal jelentős mértékben megszegi, vagy a viszony fenntartása lehetetlenné válik.",options:["Igaz","Hamis"],correct:[0]}
+);
+QUESTION_BANK.push(
+  // ============ 1) JOGI ALAPFOGALMAK ============
+  {
+    id:"pdf-ja-201",
+    type:"mcq", multi:false, topic:"Jogi alapok",
+    text:"A jogszabálynak többek között érthetőnek, általánosnak és ellentmondás-mentesnek kell lennie.",
+    options:["Igaz","Hamis"], correct:[0]
+  },
+  {
+    id:"pdf-ja-202",
+    type:"mcq", multi:true, topic:"Jogi alapok",
+    text:"Milyen követelményeknek kell megfelelnie egy jogszabálynak?",
+    options:["Érthető","Általános","Stabilitást hordozó","Lehetetlent követelő","Ellentmondás-mentes"],
+    correct:[0,1,2,4]
+  },
+  {
+    id:"pdf-ja-203",
+    type:"mcq", multi:true, topic:"Jogi alapok",
+    text:"A jogszabályok hatályosságát jellemző fő dimenziók:",
+    options:["Területi","Időbeli","Személyi/szervi","Vagyoni"],
+    correct:[0,1,2]
+  },
+
+  // ============ 2) PTK – SZEMÉLYEK JOGA, SZEMÉLYISÉGI JOGOK ============
+  {
+    id:"pdf-pj-301",
+    type:"mcq", multi:false, topic:"Polgári jog – Személyek",
+    text:"Az ember jogképessége az élve születéstől a halálig áll fenn.",
+    options:["Igaz","Hamis"], correct:[0]
+  },
+  {
+    id:"pdf-pj-302",
+    type:"mcq", multi:true, topic:"Polgári jog – Személyek",
+    text:"Mitől függ a cselekvőképesség?",
+    options:["Nem","Kor","Származás","Elmeállapot"],
+    correct:[1,3]
+  },
+  {
+    id:"pdf-pj-303",
+    type:"mcq", multi:false, topic:"Polgári jog – Személyek",
+    text:"Mikortól kezdődik a teljes jogképesség?",
+    options:["Élveszületéstől","Fogantatástól","14. életévtől","18. életévtől"],
+    correct:[0]
+  },
+  {
+    id:"pdf-pj-304",
+    type:"mcq", multi:true, topic:"Polgári jog – Alapok",
+    text:"Milyen személyeket ismer a Ptk.?",
+    options:["Jogi személy","Állam","Önkormányzati személy","Természetes személy"],
+    correct:[0,1,3]
+  },
+  {
+    id:"pdf-pj-305",
+    type:"mcq", multi:true, topic:"Polgári jog – Alapok",
+    text:"Melyek a polgári jogviszony elemei?",
+    options:["Alany","Tárgy","Tartalom","Joghatóság"],
+    correct:[0,1,2]
+  },
+
+  // ============ 3) DOLOGI JOG ============
+  {
+    id:"pdf-dj-401",
+    type:"mcq", multi:false, topic:"Dologi jog – Kisajátítás",
+    text:"A kisajátítás egyetlen feltétele, hogy közérdekből történjen.",
+    options:["Igaz","Hamis"], correct:[1]
+  },
+  {
+    id:"pdf-dj-402",
+    type:"mcq", multi:false, topic:"Dologi jog – Elbirtoklás",
+    text:"Az elbirtoklás főszabályként 5 év.",
+    options:["Igaz","Hamis"], correct:[1]
+  },
+  {
+    id:"pdf-dj-403",
+    type:"mcq", multi:true, topic:"Dologi jog – Kisajátítás",
+    text:"Melyek a kisajátítás törvényi feltételei?",
+    options:["Kivételesen","Közérdekű célra","Azonnali, teljes és feltétlen kártalanítás mellett","Miniszteri jóváhagyással"],
+    correct:[0,1,2]
+  },
+  {
+    id:"pdf-dj-404",
+    type:"mcq", multi:true, topic:"Dologi jog – Tulajdonjog",
+    text:"Mi tartozik a tulajdonjog tartalmát képező jogosultságok közé?",
+    options:["Haszonélvezet","Birtoklás","Használat","Kárveszély viselése","Rendelkezési jog"],
+    correct:[1,2,4]
+  },
+  {
+    id:"pdf-dj-405",
+    type:"mcq", multi:true, topic:"Dologi jog – Korlátolt dologi jogok",
+    text:"Melyek korlátolt dologi jogok?",
+    options:["Szolgalom","Zálogjog","Haszonélvezet","Birtoklás"],
+    correct:[0,1,2]
+  },
+  {
+    id:"pdf-dj-406",
+    type:"mcq", multi:true, topic:"Dologi jog – Birtok",
+    text:"Ki lehet birtokos?",
+    options:[
+      "Aki a dolgot sajátjaként tartja hatalmában",
+      "Aki időleges birtokra jogosító jogviszony alapján tartja hatalmában",
+      "A főbirtokos (akitől az albirtokos származtatja a birtokot)",
+      "Akinek dolgát jogalap nélkül más tartja tényleges hatalmában"
+    ],
+    correct:[0,1,2]
+  },
+  {
+    id:"pdf-dj-407",
+    type:"mcq", multi:true, topic:"Dologi jog – Közös tulajdon",
+    text:"A közös tulajdon megszüntetésének módjai:",
+    options:["Megváltás","Értékesítés","Természetbeni megosztás","Államosítás"],
+    correct:[0,1,2]
+  },
+
+  // ============ 4) GAZDASÁGI ÉLET SZEREPLŐI / GAZDASÁGI TÁRSASÁGOK ============
+  {
+    id:"pdf-gt-501",
+    type:"mcq", multi:false, topic:"Jogi személy / Gt",
+    text:"A gazdasági társaságok tekintetében formakényszer érvényesül.",
+    options:["Igaz","Hamis"], correct:[0]
+  },
+  {
+    id:"pdf-gt-502",
+    type:"mcq", multi:false, topic:"Jogi személy / Gt",
+    text:"A bt. és a kkt. nem jogi személy.",
+    options:["Igaz","Hamis"], correct:[1]
+  },
+  {
+    id:"pdf-gt-503",
+    type:"mcq", multi:false, topic:"Jogi személy / Gt",
+    text:"Nyrt-t nem lehet alapítani, csak Zrt-ből alakulhat át.",
+    options:["Igaz","Hamis"], correct:[0]
+  },
+  {
+    id:"pdf-gt-504",
+    type:"mcq", multi:false, topic:"Jogi személy / Gt",
+    text:"Minden gazdasági társaságot a Cégbíróság vesz nyilvántartásba.",
+    options:["Igaz","Hamis"], correct:[0]
+  },
+  {
+    id:"pdf-gt-505",
+    type:"mcq", multi:true, topic:"Cégeljárás / Jogi személyek",
+    text:"Mely tanult szervezetek minősülnek jogi személynek?",
+    options:["Egyéni cég","Egyszemélyes kft.","Alapítvány","Szövetkezet","Egyesülés"],
+    correct:[1,2,3,4]
+  },
+  {
+    id:"pdf-gt-506",
+    type:"mcq", multi:true, topic:"Gazdasági társaságok – Alapítás",
+    text:"Mely szervezeteknél kell – főszabályként – legalább három alapító tag?",
+    options:["Részvénytársaság","Egyesülés","Szövetkezet","Kft."],
+    correct:[0,1,2]
+  },
+  {
+    id:"pdf-gt-507",
+    type:"mcq", multi:false, topic:"Gazdasági társaságok – Tények",
+    text:"Közös vállalatot már nem lehet alapítani.",
+    options:["Igaz","Hamis"], correct:[0]
+  },
+  {
+    id:"pdf-gt-508",
+    type:"mcq", multi:true, topic:"Gazdasági társaságok – Részvények",
+    text:"Melyik NEM tartozik a nevesített részvényfajták közé?",
+    options:["Elsőbbségi részvény","Dolgozói részvény","Törzsrészvény","Visszaváltható részvény"],
+    correct:[3]
+  },
+
+  // ============ 5) MUNKAJOG – A MUNKAVISZONY LÉTESÍTÉSE ÉS A MUNKAVÉGZÉS SZABÁLYAI ============
+  {
+    id:"pdf-mt-601",
+    type:"mcq", multi:false, topic:"Munkajog – Alapok",
+    text:"A munkaviszony lehet tipikus és atipikus is.",
+    options:["Igaz","Hamis"], correct:[0]
+  },
+  {
+    id:"pdf-mt-602",
+    type:"mcq", multi:false, topic:"Munkajog – Próbaidő",
+    text:"Ha a kollektív szerződés másként nem rendelkezik, a próbaidő legfeljebb három hónap lehet.",
+    options:["Igaz","Hamis"], correct:[0]
+  },
+  {
+    id:"pdf-mt-603",
+    type:"mcq", multi:true, topic:"Munkajog – Munkaszerződés",
+    text:"A munkaszerződés kötelező tartalmi elemei:",
+    options:["Felek megnevezése és lényeges adatai","Versenytilalmi megállapodás","Alapbér","Munkakör"],
+    correct:[0,2,3]
+  },
+  {
+    id:"pdf-mt-604",
+    type:"mcq", multi:true, topic:"Munkajog – Atipikus viszonyok",
+    text:"Mi minősül atipikus munkaviszonynak?",
+    options:["Bedolgozói jogviszony","Távmunka","Munkaerő-kölcsönzés","Részmunkaidős/határozott idejű/több munkáltatós","Egyszerűsített foglalkoztatás"],
+    correct:[0,1,2,3,4]
+  },
+  {
+    id:"pdf-mt-605",
+    type:"mcq", multi:true, topic:"Munkajog – Munkáltatói kötelezettségek",
+    text:"Melyek a munkáltatói kötelezettségek?",
+    options:[
+      "Munka megszervezése",
+      "Munkavégzés irányítása",
+      "A munkavállaló egészségi állapotához igazodó foglalkoztatás",
+      "A feltételek/munkaidő-beosztás módosítása egészségi változás esetén"
+    ],
+    correct:[0,1,2,3]
+  },
+  {
+    id:"pdf-mt-606",
+    type:"mcq", multi:true, topic:"Munkajog – Szabadságok/távollét",
+    text:"Mikor jár a munkavállalónak fizetés nélküli szabadság vagy mentesülés?",
+    options:[
+      "Gyermek gondozása (meghatározott korhatárig)",
+      "Kötelező orvosi vizsgálat idejére",
+      "Véradás bármennyi időtartamra",
+      "Hozzátartozó halálakor két munkanapra",
+      "Bíróság/hatóság előtti megjelenés meghatározott időre",
+      "Elháríthatatlan ok miatti távollét idejére"
+    ],
+    correct:[0,1,3,4,5]
+  },
+  {
+    id:"pdf-mt-607",
+    type:"mcq", multi:true, topic:"Munkajog – Megszűnés/megszüntetés",
+    text:"A munkaviszony megszűnésének/megszüntetésének esetei:",
+    options:[
+      "Munkavállaló halála",
+      "Munkáltató jogutód nélküli megszűnése",
+      "Felmondás",
+      "Közös megegyezés (határozott időnél is)",
+      "Jogviszonyváltás (munkáltatói jogállásváltozás)"
+    ],
+    correct:[0,1,2,3]
+  }
+);
+
+const QUESTIONS = QUESTION_BANK;
+
+// ===========================================================================
+
+/* ======= KIS SEGÉDEK ======= */
 const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
 const pickRandom = (arr, n) => shuffle(arr).slice(0, n);
 const normalize = s => (s||"").toString().trim().toLowerCase()
@@ -545,39 +966,48 @@ let currentSet = [];
 let score = 0;
 let answered = 0;
 
-/* ======= ÚJ: Hibák tartós tárolása ======= */
-const LS_MISTAKES = "gazdjog_mistakes_v1";
+/* ======= LocalStorage kulcsok ======= */
+const LS_MISTAKES = "gazdjog_mistakes_min_v1";
+const LS_SEEN     = "gazdjog_seen_min_v1";
 
+/* ======= Hibák tárolása ======= */
 function loadMistakes(){
   try{
     const raw = localStorage.getItem(LS_MISTAKES);
     const parsed = raw ? JSON.parse(raw) : [];
-    // csak olyan elem, ami ma is szerepel a bankban (azonos id-vel)
-    const bankIds = new Set(QUESTION_BANK.map(q=>q.id));
+    const bankIds = new Set(QUESTIONS.map(q=>q.id));
     return parsed.filter(q=>bankIds.has(q.id));
   }catch(e){ return []; }
 }
-
-function saveMistakes(list){
-  localStorage.setItem(LS_MISTAKES, JSON.stringify(list));
-}
+function saveMistakes(list){ localStorage.setItem(LS_MISTAKES, JSON.stringify(list)); }
 function removeMistake(id){
-  const list = loadMistakes();
-  const next = list.filter(x => x.id !== id);
-  if(next.length !== list.length){
-    saveMistakes(next);
-  }
+  const list = loadMistakes().filter(x => x.id !== id);
+  saveMistakes(list);
 }
 function addMistake(q){
   const list = loadMistakes();
-  if(!list.find(x=>x.id===q.id)){
-    list.push(q);
-    saveMistakes(list);
-  }
+  if(!list.find(x=>x.id===q.id)){ list.push(q); saveMistakes(list); }
 }
-function clearMistakes(){
-  saveMistakes([]);
+function clearMistakes(){ saveMistakes([]); }
+
+/* ======= Seen (látott kérdések) ======= */
+function loadSeen(){
+  try{
+    const raw = localStorage.getItem(LS_SEEN);
+    const arr = raw ? JSON.parse(raw) : [];
+    const bankIds = new Set(QUESTIONS.map(q=>q.id));
+    return new Set(arr.filter(id => bankIds.has(id)));
+  }catch(e){ return new Set(); }
 }
+function saveSeen(seenSet){
+  localStorage.setItem(LS_SEEN, JSON.stringify([...seenSet]));
+}
+function addSeen(ids){
+  const seen = loadSeen();
+  ids.forEach(id => seen.add(id));
+  saveSeen(seen);
+}
+function clearSeen(){ localStorage.removeItem(LS_SEEN); }
 
 /* ======= UI elemek ======= */
 const testContainer = document.getElementById('testContainer');
@@ -585,18 +1015,38 @@ const resultCard = document.getElementById('resultCard');
 const scoreLine = document.getElementById('scoreLine');
 const detailLine = document.getElementById('detailLine');
 
+const bulkCard = document.getElementById('bulkCard');
+
 const mistakesCard = document.getElementById('mistakesCard');
 const mistakesMeta = document.getElementById('mistakesMeta');
 const mistakesList = document.getElementById('mistakesList');
 
-/* ======= Render / Teszt ======= */
+const unseenCard = document.getElementById('unseenCard');
+const unseenMeta = document.getElementById('unseenMeta');
+const unseenList = document.getElementById('unseenList');
+
+/* ======= Helper: Hibaszámláló frissítése a gombon ======= */
+function updateResultMistakesBtn(){
+  const n = loadMistakes().length;
+  const btn1 = document.getElementById('resultPracticeMistakesBtn');
+  const btn2 = document.getElementById('practiceMistakesBtn');
+  if (btn1) btn1.textContent = `Hibáim tanulása (${n})`;
+  if (btn2) btn2.textContent = `Hibáim tanulása (10 véletlen kérdés)`;
+}
+
+/* ======= Teszt render ======= */
 function renderTest(questions){
-  document.getElementById('bulkCard')?.classList.remove('hidden');
+  bulkCard?.classList.remove('hidden');
   testContainer.innerHTML = "";
+
+  // lapok elrejtése
   resultCard.classList.add('hidden');
-  mistakesCard.classList.add('hidden'); 
+  mistakesCard.classList.add('hidden');
+  unseenCard.classList.add('hidden');
   document.querySelectorAll('.tabs .btn').forEach(b=>b.classList.remove('active'));
+
   score = 0; answered = 0;
+  currentSet = questions.slice();
 
   questions.forEach((q, idx)=>{
     const card = document.createElement('div');
@@ -651,25 +1101,31 @@ function renderTest(questions){
     testContainer.appendChild(card);
   });
 
-  testContainer.addEventListener('click', onCardClick);
+  updateResultMistakesBtn();
 }
 
-function onCardClick(ev){
-  const btn = ev.target.closest('button');
-  if(!btn) return;
-  const qid = btn.getAttribute('data-qid');
-  const action = btn.getAttribute('data-action');
-  const q = currentSet.find(x=>x.id===qid);
-  if(!q) return;
+/* ======= Kártya gombjai – egyszeri delegálás ======= */
+if (!window.__cardsBound){
+  testContainer.addEventListener('click', (ev)=>{
+    const btn = ev.target.closest('button[data-action]');
+    if(!btn) return;
+    const qid = btn.getAttribute('data-qid');
+    const action = btn.getAttribute('data-action');
+    const q = currentSet.find(x=>x.id===qid);
+    if(!q) return;
 
-  if(action === "check"){
-    handleCheck(q);
-  }else if(action === "show-solution"){
-    showSolution(q, true);
-  }
+    if(action === "check"){
+      handleCheck(q);
+    }else if(action === "show-solution"){
+      showSolution(q, true);
+    }
+  });
+  window.__cardsBound = true;
 }
 
+/* ======= Ellenőrzés / Megoldás ======= */
 function handleCheck(q){
+  addSeen([q.id]);
   const card = document.getElementById(`q-${q.id}`);
   const fb = document.getElementById(`fb-${q.id}`);
   let isCorrect = false;
@@ -712,26 +1168,19 @@ function handleCheck(q){
 
   fb.textContent = isCorrect ? "✅ Helyes válasz! +1 pont" : "❌ Nem teljesen jó.";
   if(!card.dataset.done){
-  answered++;
-  if(isCorrect){
-    score++;
-    removeMistake(q.id);      
-  }else{
-    addMistake(q);              
+    answered++;
+    if(isCorrect){ score++; removeMistake(q.id); }
+    else{ addMistake(q); }
+    card.dataset.done = "1";
+    updateResultMistakesBtn();
+    if(!mistakesCard.classList.contains('hidden')) renderMistakesView();
   }
-  card.dataset.done = "1";
-  if(!mistakesCard.classList.contains('hidden')){
-    renderMistakesView();
-  }
+
+  if(answered === currentSet.length) finalizeScore();
 }
 
-
-  if(answered === currentSet.length){
-    finalizeScore();
-  }
-}
-
-function showSolution(q, revealOnly=true){
+function showSolution(q){
+  addSeen([q.id]);
   const card = document.getElementById(`q-${q.id}`);
   const fb = document.getElementById(`fb-${q.id}`);
 
@@ -750,10 +1199,12 @@ function showSolution(q, revealOnly=true){
     const input = card.querySelector('input[type="text"]');
     input.disabled = true;
     const sol = "Megoldás: " + (q.correctText||[]).join("  |  ");
-    const solDiv = document.createElement('div');
-    solDiv.className = 'meta';
-    solDiv.textContent = sol;
-    if(!card.querySelector('.meta + .meta')) input.insertAdjacentElement('afterend', solDiv);
+    if(!card.querySelector('.footer .meta + .meta')){
+      const solDiv = document.createElement('div');
+      solDiv.className = 'meta';
+      solDiv.textContent = sol;
+      input.insertAdjacentElement('afterend', solDiv);
+    }
     fb.textContent = "Megoldás megjelenítve.";
   }
 
@@ -761,12 +1212,8 @@ function showSolution(q, revealOnly=true){
     answered++;
     card.dataset.done = "1";
   }
-
-  if(answered === currentSet.length){
-    finalizeScore();
-  }
+  if(answered === currentSet.length) finalizeScore();
 }
-
 
 function finalizeScore(){
   resultCard.classList.remove('hidden');
@@ -775,70 +1222,54 @@ function finalizeScore(){
   detailLine.textContent = `Teljesítmény: ${pct}% • Helyes válasz után zöld keret, hibás után piros.`;
 }
 
-/* ======= Vezérlők ======= */
-document.getElementById('startBtn').addEventListener('click', ()=>{
-  currentSet = pickRandom(QUESTION_BANK, Math.min(20, QUESTION_BANK.length));
-  renderTest(currentSet);
-});
+/* ======= Felső gombok – egyszeri kötés ======= */
+if (!window.__topBtnsBound){
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    const n = Math.min(20, QUESTIONS.length);
+    renderTest(pickRandom(QUESTIONS, n));
+  });
 
-document.getElementById('showAllBtn').addEventListener('click', ()=>{
-  currentSet = [...QUESTION_BANK];
-  renderTest(currentSet);
-});
+  document.getElementById('showAllBtn').addEventListener('click', ()=>{
+    renderTest([...QUESTIONS]);
+  });
 
-document.getElementById('restartBtn')?.addEventListener('click', ()=>{
-  currentSet = pickRandom(QUESTION_BANK, Math.min(20, QUESTION_BANK.length));
-  renderTest(currentSet);
-});
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    const n = Math.min(20, QUESTIONS.length);
+    renderTest(pickRandom(QUESTIONS, n));
+  });
 
-document.getElementById('reviewBtn')?.addEventListener('click', ()=>{
-  currentSet.forEach(q=>showSolution(q,true));
-});
+  document.getElementById('reviewBtn').addEventListener('click', ()=>{
+    currentSet.forEach(q=>showSolution(q,true));
+  });
 
-/* ======= ÚJ: Hibáim fül kezelése ======= */
-const mistakesTabBtn = document.getElementById('mistakesTabBtn');
-const practiceMistakes10 = document.getElementById('practiceMistakes10');
-const practiceMistakes20 = document.getElementById('practiceMistakes20');
-const clearMistakesBtn = document.getElementById('clearMistakesBtn');
-
-mistakesTabBtn.addEventListener('click', ()=>{
-  // Mindig működjön a "Hibáim" gomb, akkor is, ha újra renderelt a teszt
-function openMistakesTab(){
-  renderMistakesView();
-  mistakesCard.classList.remove('hidden');
-  resultCard.classList.add('hidden');
-  testContainer.innerHTML = ""; // üríti az aktuális kérdéseket
-  document.querySelectorAll('.tabs .btn').forEach(b=>b.classList.remove('active'));
-  mistakesTabBtn.classList.add('active');
-}
-
-if(mistakesTabBtn){
-  mistakesTabBtn.addEventListener('click', openMistakesTab);
-}
-
-});
-
-practiceMistakes10.addEventListener('click', ()=>{
-  const list = loadMistakes();
-  if(list.length===0){ alert("Nincs még hibád. Oldj meg pár kérdést előbb!"); return; }
-  currentSet = pickRandom(list, Math.min(10, list.length));
-  renderTest(currentSet);
-});
-
-practiceMistakes20.addEventListener('click', ()=>{
-  const list = loadMistakes();
-  if(list.length===0){ alert("Nincs még hibád. Oldj meg pár kérdést előbb!"); return; }
-  currentSet = pickRandom(list, Math.min(20, list.length));
-  renderTest(currentSet);
-});
-
-clearMistakesBtn.addEventListener('click', ()=>{
-  if(confirm("Biztosan törlöd az összes rögzített hibát?")){
-    clearMistakes();
+  const mistakesTabBtn = document.getElementById('mistakesTabBtn');
+  mistakesTabBtn.addEventListener('click', ()=>{
     renderMistakesView();
-  }
-});
+    mistakesCard.classList.remove('hidden');
+    unseenCard.classList.add('hidden');
+    resultCard.classList.add('hidden');
+    bulkCard.classList.add('hidden');
+    testContainer.innerHTML = "";
+    document.querySelectorAll('.tabs .btn').forEach(b=>b.classList.remove('active'));
+    mistakesTabBtn.classList.add('active');
+  });
 
+  const unseenTabBtn = document.getElementById('unseenTabBtn');
+  unseenTabBtn.addEventListener('click', ()=>{
+    renderUnseenView();
+    unseenCard.classList.remove('hidden');
+    mistakesCard.classList.add('hidden');
+    resultCard.classList.add('hidden');
+    bulkCard.classList.add('hidden');
+    testContainer.innerHTML = "";
+    document.querySelectorAll('.tabs .btn').forEach(b=>b.classList.remove('active'));
+    unseenTabBtn.classList.add('active');
+  });
+
+  window.__topBtnsBound = true;
+}
+
+/* ======= Hibáim lap ======= */
 function renderMistakesView(){
   const list = loadMistakes();
   mistakesList.innerHTML = "";
@@ -851,112 +1282,96 @@ function renderMistakesView(){
     div.innerHTML = `<strong>${idx+1}.</strong> <em>${q.topic||""}</em> — ${q.text}`;
     mistakesList.appendChild(div);
   });
+  updateResultMistakesBtn();
 }
-// Összes ellenőrzése most
-const checkAllBtn = document.getElementById('checkAllBtn');
 
-function checkAllNow(){
-  if(!currentSet || currentSet.length===0) return;
+document.getElementById('practiceMistakes10').addEventListener('click', ()=>{
+  const list = loadMistakes();
+  if(list.length===0){ alert("Nincs még hibád. Oldj meg pár kérdést előbb!"); return; }
+  renderTest(pickRandom(list, Math.min(10, list.length)));
+});
 
-  currentSet.forEach(q=>{
-    const card = document.getElementById(`q-${q.id}`);
-    if(card && !card.dataset.done){
-      handleCheck(q);
-    }
-  });
+document.getElementById('practiceMistakes20').addEventListener('click', ()=>{
+  const list = loadMistakes();
+  if(list.length===0){ alert("Nincs még hibád. Oldj meg pár kérdést előbb!"); return; }
+  renderTest(pickRandom(list, Math.min(20, list.length)));
+});
 
-  if(answered === currentSet.length){
-    finalizeScore();
-    checkAllBtn.disabled = true;
+document.getElementById('clearMistakesBtn').addEventListener('click', ()=>{
+  if(confirm("Biztosan törlöd az összes rögzített hibát?")){
+    clearMistakes();
+    renderMistakesView();
   }
+});
+
+/* ======= Gyors gyakorló gombok a kártyán ======= */
+document.getElementById('practiceMistakesBtn').addEventListener('click', ()=>{
+  const mistakes = loadMistakes();
+  if(mistakes.length === 0){
+    alert("Még nincsenek rögzített hibáid. Oldj meg néhány kérdést előbb!");
+    return;
+  }
+  renderTest(pickRandom(mistakes, Math.min(10, mistakes.length)));
+});
+
+document.getElementById('practiceMistakesAll').addEventListener('click', ()=>{
+  const list = loadMistakes();
+  if (list.length === 0) {
+    alert("Nincs még hibád. Oldj meg pár kérdést előbb!");
+    return;
+  }
+  renderTest([...list]);
+});
+
+document.getElementById('resultPracticeMistakesBtn').addEventListener('click', ()=>{
+  const mistakes = loadMistakes();
+  if(mistakes.length === 0){
+    alert("Még nincsenek rögzített hibáid. Oldj meg pár kérdést előbb!");
+    return;
+  }
+  renderTest(pickRandom(mistakes, Math.min(20, mistakes.length)));
+});
+
+/* ======= UNSEEN (még nem tanult) lap ======= */
+function getUnseen(){
+  const seen = loadSeen();
+  return QUESTIONS.filter(q => !seen.has(q.id));
 }
-
-checkAllBtn?.addEventListener('click', checkAllNow);
-function finalizeScore(){
-  resultCard.classList.remove('hidden');
-  const pct = Math.round((score/currentSet.length)*100);
-  scoreLine.textContent = `Pontszám: ${score} / ${currentSet.length}`;
-  detailLine.textContent = `Teljesítmény: ${pct}% • Helyes válasz után zöld keret, hibás után piros.`;
-  document.getElementById('bulkCard')?.classList.add('hidden'); // <-- opcionális
-}
-
-if (checkAllBtn) {
-  checkAllBtn.addEventListener("click", () => {
-    if (!currentSet || currentSet.length === 0) return;
-
-    currentSet.forEach((q) => {
-      const card = document.getElementById(`q-${q.id}`);
-      if (card && !card.dataset.done) {
-         handleCheck(q);
-        let wasAnswered = false;
-        let isCorrect = false;
-
-        if (q.type === "mcq") {
-          const inputs = [...card.querySelectorAll('input[name="ans-' + q.id + '"]')];
-          const selected = inputs.filter(i => i.checked).map(i => parseInt(i.value, 10));
-          const correct = (q.correct || []);
-          selected.sort((a, b) => a - b);
-          correct.sort((a, b) => a - b);
-          isCorrect = JSON.stringify(selected) === JSON.stringify(correct);
-          wasAnswered = selected.length > 0;
-        } else {
-          const input = card.querySelector('input[type="text"]');
-          const given = normalize(input.value);
-          isCorrect = (q.correctText || []).some(acc => normalize(acc) === given);
-          wasAnswered = !!input.value.trim();
-        }
-
-        if (!isCorrect) addMistake(q);
-
-        handleCheck(q);
-      }
-    });
-
-    if (answered === currentSet.length) {
-      finalizeScore();
-      checkAllBtn.disabled = true;
-    }
+function renderUnseenView(){
+  const unseen = getUnseen();
+  unseenList.innerHTML = "";
+  unseenMeta.textContent = unseen.length
+    ? `Még nem tanult kérdések száma: ${unseen.length} db.`
+    : "Gratulálok! Minden kérdést legalább egyszer láttál.";
+  unseen.forEach((q, idx) => {
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.innerHTML = `<strong>${idx+1}.</strong> <em>${q.topic||""}</em> — ${q.text}`;
+    unseenList.appendChild(div);
   });
 }
 
-const practiceMistakesBtn = document.getElementById('practiceMistakesBtn');
-if(practiceMistakesBtn){
-  practiceMistakesBtn.addEventListener('click', ()=>{
-    const mistakes = loadMistakes();
-    if(mistakes.length === 0){
-      alert("Még nincsenek rögzített hibáid. Oldj meg néhány kérdést előbb!");
-      return;
-    }
-    currentSet = pickRandom(mistakes, Math.min(20, mistakes.length));
-    renderTest(currentSet);
-  });
-}
-const resultPracticeMistakesBtn = document.getElementById('resultPracticeMistakesBtn');
-if(resultPracticeMistakesBtn){
-  resultPracticeMistakesBtn.addEventListener('click', ()=>{
-    const mistakes = loadMistakes();
-    if(mistakes.length === 0){
-      alert("Még nincsenek rögzített hibáid. Oldj meg pár kérdést előbb!");
-      return;
-    }
-    currentSet = pickRandom(mistakes, Math.min(20, mistakes.length));
-    renderTest(currentSet);
-  });
-}
-const practiceMistakesAll = document.getElementById('practiceMistakesAll');
-if (practiceMistakesAll) {
-  practiceMistakesAll.addEventListener('click', () => {
-    const list = loadMistakes();
-    if (list.length === 0) {
-      alert("Nincs még hibád. Oldj meg pár kérdést előbb!");
-      return;
-    }
-    currentSet = [...list]; 
-    renderTest(currentSet);
-  });
-}
+document.getElementById('practiceUnseen10').addEventListener('click', ()=>{
+  const unseen = getUnseen();
+  if (unseen.length===0){ alert("Nincs több új (nem látott) kérdés."); return; }
+  renderTest(pickRandom(unseen, Math.min(10, unseen.length)));
+});
 
+document.getElementById('practiceUnseen20').addEventListener('click', ()=>{
+  const unseen = getUnseen();
+  if (unseen.length===0){ alert("Nincs több új (nem látott) kérdés."); return; }
+  renderTest(pickRandom(unseen, Math.min(20, unseen.length)));
+});
 
+document.getElementById('clearSeenBtn').addEventListener('click', ()=>{
+  if (confirm("Törlöd a 'már látott' kérdések listáját?")){
+    clearSeen();
+    renderUnseenView();
+  }
+});
+
+/* ======= Init ======= */
+updateResultMistakesBtn();
 </script>
 </body>
 </html>
