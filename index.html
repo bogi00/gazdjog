@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Gazdjog gyakorló teszt</title>
+<title>Gazdjog gyakorló teszt – minimal</title>
 <style>
   :root{
     --bg:#0f172a; --card:#111827; --muted:#9ca3af; --ok:#10b981; --err:#ef4444; --pri:#60a5fa;
@@ -88,7 +88,7 @@
     <div class="meta" id="unseenMeta">Betöltés…</div>
     <div class="row" style="margin:10px 0">
       <button id="practiceUnseen10" class="btn" type="button">Gyakorlás (10 véletlen)</button>
-      <button id="practiceUnseen20" class="btn" type="button">Gyakorlás (20 véletlen)</button>
+      <button id="practiceUnseen20" class="btn" type="button">Gyakorlás (30 véletlen)</button>
       <button id="clearSeenBtn" class="btn ghost" type="button">„Megnézettek” törlése</button>
     </div>
     <div id="unseenList"></div>
@@ -371,7 +371,7 @@ QUESTION_BANK.push(
     correct:[0,1,2]
   },
   
-  {id:"dj-001",type:"mcq",multi:false,topic:"Dologi jog",text:"Származékos tulajdonszerzésnek minősül a csere, az öröklés vagy az adásvétel útján történő szerzés.",options:["IGAZ","HAMIS"],correct:[0]},
+  {id:"dj-001",type:"mcq",multi:false,topic:"Dologi jog",text:"Származékos tulajdonszerzésnek minősül a csere vagy az adásvétel útján történő szerzés.",options:["IGAZ","HAMIS"],correct:[0]},
   
   {id:"koz-001",type:"mcq",multi:false,topic:"Közigazgatási jog / Eljárás",text:"A közigazgatási hatóság a hatáskörét és illetékességét csak az eljárás megkezdésekor vizsgálja.",options:["IGAZ","HAMIS"],correct:[1]},
   
@@ -703,10 +703,10 @@ QUESTION_BANK.push(
 // --- GAZDASÁGI ÉLET SZEREPLŐI / GAZDASÁGI TÁRSASÁGOK ---
 QUESTION_BANK.push(
   {id:"pdf-gt-401",type:"mcq",multi:false,topic:"Jogi személy / Gt",text:"A gazdasági társaságok tekintetében formakényszer érvényesül.",options:["Igaz","Hamis"],correct:[0]},
-  {id:"pdf-gt-402",type:"mcq",multi:false,topic:"Jogi személy / Gt",text:"A bt. és a kkt. nem jogi személy.",options:["Igaz","Hamis"],correct:[0]},
+  {id:"pdf-gt-402",type:"mcq",multi:false,topic:"Jogi személy / Gt",text:"A bt. és a kkt. nem jogi személy.",options:["Igaz","Hamis"],correct:[1]},
   {id:"pdf-gt-403",type:"mcq",multi:false,topic:"Jogi személy / Gt",text:"Nyrt-t nem lehet alapítani, csak Zrt-ből alakulhat át.",options:["Igaz","Hamis"],correct:[0]},
   {id:"pdf-gt-404",type:"mcq",multi:false,topic:"Jogi személy / Gt",text:"Minden gazdasági társaságot a Cégbíróság vesz nyilvántartásba.",options:["Igaz","Hamis"],correct:[0]},
-  {id:"pdf-gt-405",type:"mcq",multi:false,topic:"Cégeljárás",text:"Az egyéni vállalkozásról szóló törvény (Evc.) hatálya kiterjed valamennyi vállalkozóra.",options:["Igaz","Hamis"],correct:[0]}
+  {id:"pdf-gt-405",type:"mcq",multi:false,topic:"Cégeljárás",text:"Az egyéni vállalkozásról szóló törvény (Evc.) hatálya kiterjed valamennyi vállalkozóra.",options:["Igaz","Hamis"],correct:[1]}
 );
 // --- MUNKAJOG (létesítés és munkavégzés szabályai) ---
 QUESTION_BANK.push(
@@ -846,7 +846,7 @@ QUESTION_BANK.push(
     id:"pdf-gt-503",
     type:"mcq", multi:false, topic:"Jogi személy / Gt",
     text:"Nyrt-t nem lehet alapítani, csak Zrt-ből alakulhat át.",
-    options:["Igaz","Hamis"], correct:[1]
+    options:["Igaz","Hamis"], correct:[0]
   },
   {
     id:"pdf-gt-504",
@@ -1000,7 +1000,7 @@ QUESTION_BANK.push(
       "A korábbi csődeljárás iránti kérelmét a bíróság hivatalból elutasította, és az erről szóló jogerős végzés közzétételétől számítva egy év még nem telt el.",
       "Amíg a korábbi csődeljárás elrendelésének időpontjában fennállt, illetve annak során keletkezett hitelezői igény kielégítésre nem került."
     ],
-    correct:[1,2]
+    correct:[0,1,2]
   },
   {
     id:"cstv-006",
@@ -1680,7 +1680,7 @@ document.getElementById('practiceUnseen10').addEventListener('click', ()=>{
 document.getElementById('practiceUnseen20').addEventListener('click', ()=>{
   const unseen = getUnseen();
   if (unseen.length===0){ alert("Nincs több új (nem látott) kérdés."); return; }
-  renderTest(pickRandom(unseen, Math.min(20, unseen.length)));
+  renderTest(pickRandom(unseen, Math.min(30, unseen.length)));
 });
 
 document.getElementById('clearSeenBtn').addEventListener('click', ()=>{
@@ -1695,5 +1695,3 @@ updateResultMistakesBtn();
 </script>
 </body>
 </html>
-
-
