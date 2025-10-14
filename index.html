@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Gazdjog gyakorló teszt – minimal</title>
+<title>Gazdjog gyakorló teszt</title>
 <style>
   :root{
     --bg:#0f172a; --card:#111827; --muted:#9ca3af; --ok:#10b981; --err:#ef4444; --pri:#60a5fa;
@@ -76,7 +76,7 @@
     <div class="meta" id="mistakesMeta">Még nincs rögzített hibád.</div>
     <div class="row" style="margin:10px 0">
       <button id="practiceMistakes10" class="btn" type="button">Gyakorlás a hibáimból (10)</button>
-      <button id="practiceMistakes20" class="btn" type="button">Gyakorlás a hibáimból (20)</button>
+      <button id="practiceMistakes20" class="btn" type="button">Gyakorlás a hibáimból (30)</button>
       <button id="clearMistakesBtn" class="btn ghost" type="button">Hibalista törlése</button>
     </div>
     <div id="mistakesList"></div>
@@ -88,7 +88,7 @@
     <div class="meta" id="unseenMeta">Betöltés…</div>
     <div class="row" style="margin:10px 0">
       <button id="practiceUnseen10" class="btn" type="button">Gyakorlás (10 véletlen)</button>
-      <button id="practiceUnseen20" class="btn" type="button">Gyakorlás (30 véletlen)</button>
+      <button id="practiceUnseen20" class="btn" type="button">Gyakorlás (80 véletlen)</button>
       <button id="clearSeenBtn" class="btn ghost" type="button">„Megnézettek” törlése</button>
     </div>
     <div id="unseenList"></div>
@@ -96,18 +96,7 @@
 </div>
 
 <script>
-/* ======================== KIS ALAP – KÉRDÉSEK (MINTA) ========================
-   >>> IDE TÖLTSD BE A KÉRDÉSEIDET <<<
-
-   Formátum:
-   - MCQ (egyválaszos/többválaszos):
-     { id:"x-001", type:"mcq", multi:false, topic:"Téma", text:"Kérdés?",
-       options:["A","B","C","D"], correct:[2] }
-
-   - Kitöltős:
-     { id:"x-100", type:"fill", topic:"Téma", text:"A jog legfőbb forrása az ________.",
-       correctText:["Alaptörvény","alaptörvény"] }
-*/
+ 
 const QUESTION_BANK = [
   // --- RÖVID KÉRDÉSEK – MCQ (egyválaszos / többválaszos) ---
   {id:"ja-001",type:"mcq",multi:false,topic:"Jogi alapok",text:"Mit jelent a „jogforrás” kifejezés?",options:["A jogszabály eredete, kibocsátója","A bírói döntés tartalma","A törvények tárgya","Az erkölcsi elvek összessége"],correct:[0]},
@@ -138,7 +127,7 @@ const QUESTION_BANK = [
   {id:"ja-026",type:"mcq",multi:false,topic:"Szolgalom",text:"Ki az uralkodó telek a telki szolgalomnál?",options:["A használatot tűrő telek","A használatot élvező telek","Az eladó telek","Állami föld"],correct:[1]},
   {id:"ja-027",type:"mcq",multi:true, topic:"Korlátolt dologi jog",text:"Melyik állítás igaz a haszonélvezetre?",options:["Idegen dolgon gyakorolható","Elidegeníthető","A használat és hasznok szedésének joga","Tulajdonátruházást jelent"],correct:[0,2]},
   {id:"ja-028",type:"mcq",multi:false,topic:"Öröklés",text:"Mikor következik be az öröklés?",options:["Hagyatéki végzés jogerőre emelkedésekor","Az örökhagyó halálakor","Közjegyzői döntés után","Végrendelet olvasásakor"],correct:[1]},
-  {id:"ja-029",type:"mcq",multi:false,topic:"Öröklés",text:"Mi a „kötelesrész”?",options:["Leszármazók és túlélő házastárs esetén: A törvényes örökrészük fele","Állami illeték","Végrendelet érvényességi feltétele","Közjegyző díja","Szülők esetén (ha nincsenek leszármazók): A törvényes örökrészük egyharmada "],correct:[0,4]},
+  {id:"ja-029",type:"mcq",multi:true,topic:"Öröklés",text:"Mi a „kötelesrész”?",options:["Leszármazók és túlélő házastárs esetén: A törvényes örökrészük fele","Állami illeték","Végrendelet érvényességi feltétele","Közjegyző díja","Szülők esetén (ha nincsenek leszármazók): A törvényes örökrészük egyharmada "],correct:[0,4]},
   {id:"ja-030",type:"mcq",multi:false,topic:"Ptk.",text:"Melyik a Ptk. ötödik könyve?",options:["Családjog","Dologi jog","Kötelmi jog","Öröklési jog"],correct:[1]},
   {id:"ja-031",type:"mcq",multi:false,topic:"Szomszédjog",text:"A szomszédjogok korlátozzák:",options:["Rendelkezési jogot","Birtoklási jogot","Használati jogot","Öröklési jogot"],correct:[2]},
   {id:"ja-032",type:"mcq",multi:true, topic:"Öröklés",text:"Ki lehet örökös törvény szerint?",options:["Egyenesági rokon","Házastárs","Barát","Testvér"],correct:[0,1,3]},
@@ -273,7 +262,7 @@ const QUESTION_BANK = [
   {id:"fill-ja-06",type:"fill",topic:"Jogi alapok",text:"Magyarország legmagasabb szintű jogforrása az ________.",correctText:["alaptörvény"]},
   {id:"fill-ja-07",type:"fill",topic:"Jogi alapok",text:"A törvényeket az ________ hozza.",correctText:["országgyűlés"]},
   {id:"fill-ja-08",type:"fill",topic:"Jogi alapok",text:"A(z) ________ feladata az Alaptörvény védelme.",correctText:["alkotmánybíróság"]},
-  {id:"fill-ja-09",type:"fill",topic:"Jogi alapok",text:"A kormány által kibocsátott jogforrás a ________.",correctText:["kormányrendelet","rendelet"]},
+  {id:"fill-ja-09",type:"fill",topic:"Jogi alapok",text:"A kormány által kibocsátott jogforrás a(z) ________.",correctText:["kormányrendelet","rendelet"]},
   {id:"fill-ja-10",type:"fill",topic:"Jogi alapok",text:"A jogállam elve szerint minden állami szerv a ________ alapján működik.",correctText:["jog","jogszabályok","törvény"]},
 
   // Polgári jog – Az ember – 10 kitöltős
@@ -284,7 +273,7 @@ const QUESTION_BANK = [
   {id:"fill-emb-05",type:"fill",topic:"Polgári jog – ember",text:"A jogképesség a ________ pillanatában szűnik meg.",correctText:["halál"]},
   {id:"fill-emb-06",type:"fill",topic:"Polgári jog – ember",text:"A ________ azt jelenti, hogy az ember saját nevében jogokat szerezhet és kötelezettségeket vállalhat.",correctText:["cselekvőképesség"]},
   {id:"fill-emb-07",type:"fill",topic:"Polgári jog – ember",text:"A cselekvőképesség korlátozható, ha a személyt bíróság ________ alá helyezi.",correctText:["gondnokság","gondnokság alá"]},
-  {id:"fill-emb-08",type:"fill",topic:"Polgári jog – ember",text:"A személyiségi jogok védik többek között az ember ________ és ________.",correctText:["becsület és jóhírnév","jóhírnév és becsület"]},
+  {id:"fill-emb-08",type:"fill",topic:"Polgári jog – ember",text:"A személyiségi jogok védik többek között az ember ________ és ________.",correctText:["becsület,jóhírnév","jóhírnév,becsület"]},
   {id:"fill-emb-09",type:"fill",topic:"Polgári jog – ember",text:"Személyiségi jogsértés esetén ________ követelhető.",correctText:["sérelemdíj"]},
   {id:"fill-emb-10",type:"fill",topic:"Polgári jog – ember",text:"A személyiségi jogok alapja az emberi ________.",correctText:["méltóság"]},
 
@@ -303,7 +292,7 @@ const QUESTION_BANK = [
   // Jogi személyek & Gt 
   {id:"fill-gt-01",type:"fill",topic:"Jogi személy/Gt",text:"A ________ jogképes, jogai és kötelezettségei lehetnek.",correctText:["jogi személy"]},
   {id:"fill-gt-02",type:"fill",topic:"Jogi személy/Gt",text:"Kötelező jellemző: saját név, ________, elkülönített vagyon, szervezet.",correctText:["székhely"]},
-  {id:"fill-gt-03",type:"fill",topic:"Jogi személy/Gt",text:"A létrehozás dokumentuma a ________.",correctText:["létesítő okirat","társasági szerződés","alapszabály","alapító okirat"]},
+  {id:"fill-gt-03",type:"fill",topic:"Jogi személy/Gt",text:"A létrehozás dokumentuma a(z) ________.",correctText:["létesítő okirat","társasági szerződés","alapszabály","alapító okirat"]},
   {id:"fill-gt-04",type:"fill",topic:"Jogi személy/Gt",text:"A bejegyzést a ________ végzi.",correctText:["cégbíróság"]},
   {id:"fill-gt-05",type:"fill",topic:"Jogi személy/Gt",text:"Nonprofit szervezet: ________ és ________.",correctText:["egyesület,alapítvány","alapítvány,egyesület"]},
   {id:"fill-gt-06",type:"fill",topic:"Jogi személy/Gt",text:"A ________ a tagok szükségleteit elégíti ki, nyitott tagsággal.",correctText:["szövetkezet","szovetkezet"]},
@@ -565,7 +554,6 @@ QUESTION_BANK.push(
   { id:"kj-307", type:"mcq", multi:false, topic:"Jogforrások", text:"A normatív rendelet jogszabálynak minősül.", options:["Hamis","Igaz"], correct:[1] },
   { id:"kj-308", type:"mcq", multi:false, topic:"Igazságszolgáltatás", text:"Melyik szerv nem része az igazságszolgáltatási szervezetrendszernek Magyarországon?", options:["Kúria","Alkotmánybíróság","Megyei Törvényszékek","Ítélőtáblák","Járási Bíróságok"], correct:[1] },
   { id:"kj-309", type:"mcq", multi:false, topic:"Jogtechnika", text:"A hipotézis a jogi norma része.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"kj-310", type:"mcq", multi:false, topic:"Közjog / Közkegyelem", text:"A közkegyelem gyakorlása az Országgyűlés feladatkörébe tartozó funkció.", options:["Igaz","Hamis"], correct:[0] },
   { id:"kj-311", type:"mcq", multi:false, topic:"Önkormányzati jog", text:"A településrendezés és a településfejlesztés helyi önkormányzati feladatnak minősülnek.", options:["Hamis","Igaz"], correct:[1] },
   { id:"kj-312", type:"mcq", multi:false, topic:"Államszervezet", text:"A Miniszterelnököt a Köztársasági elnök nevezi ki.", options:["Igaz","Hamis"], correct:[1] },
   { id:"kj-313", type:"mcq", multi:false, topic:"Jogforrások", text:"A közjogi szervezetszabályozó eszközök jogforrásnak minősülnek.", options:["Igaz","Hamis"], correct:[0] },
@@ -1227,6 +1215,183 @@ QUESTION_BANK.push(
   { id:"cstv-tf-024", type:"mcq", multi:false, topic:"Cstv – Szankciók", text:"A bíróság a gazdálkodó szervezet vezetőjét ismételten is bírsággal sújthatja, ha a (ideiglenes) vagyonfelügyelővel szemben együttműködési kötelezettségét nem teljesíti.", options:["Igaz","Hamis"], correct:[0] },
   { id:"cstv-tf-025", type:"mcq", multi:false, topic:"Cstv – Fogalmak", text:"A csődeljárás olyan eljárás, amelynek célja, hogy a fizetésképtelen adós jogutód nélküli megszüntetése során a hitelezők kielégítést nyerjenek.", options:["Igaz","Hamis"], correct:[1] }
 );
+QUESTION_BANK.push(
+  // 1) Nem gazdasági társaságok
+  { id:"usr-001", type:"mcq", multi:true, topic:"Jogi személyek / Gt",
+    text:"Jelölje meg, hogy az alábbi szervezetek közül melyik/melyek nem gazdasági társaság(ok) a hatályos törvényi rendelkezések szerint!",
+    options:["Rt.","Kft.","Egyesülés","Szövetkezet"],
+    correct:[2,3]
+  },
+
+  // 2) Birtokvédelem módjai
+  { id:"usr-002", type:"mcq", multi:true, topic:"Dologi jog / Birtokvédelem",
+    text:"A birtokvédelem érvényre juttatása történhet:",
+    options:["önhatalommal","bírósági úton","sommás eljárásban (jegyző által)","közjegyző által"],
+    correct:[0,1,2]
+  },
+
+  // 3) Tulajdonjog korlátozása
+  { id:"usr-003", type:"mcq", multi:true, topic:"Dologi jog / Tulajdon",
+    text:"A tulajdonjogot korlátozhatja:",
+    options:["Miniszter","Kormány","Törvény","Mások joga"],
+    correct:[2,3]
+  },
+
+  // 4) Jogszabály definíció
+  { id:"usr-004", type:"fill", topic:"Jogi alapok / Jogforrás",
+    text:"A ______ a jog konkrét megjelenési formája, olyan mindenkire kötelező magatartásszabály, melyet az arra felhatalmazott állami szerv megalkotott, közzétett és az érvényesülését kikényszerítheti.",
+    correctText:["jogszabály","jogszabaly"]
+  },
+
+  // 5) Jogszabály hatálya
+  { id:"usr-005", type:"mcq", multi:true, topic:"Jogi alapok / Hatály",
+    text:"Jelölje meg, hogy milyen hatályossága lehet egy jogszabálynak!",
+    options:["Eszmei","Tárgyi","Fizikai","Személyi","Területi","Időbeli"],
+    correct:[3,4,5]
+  },
+
+  // 6) Külső/alaki jogforrások
+  { id:"usr-006", type:"mcq", multi:true, topic:"Jogi alapok / Jogforrások",
+    text:"Jelölje meg, hogy az alábbi elemek közül mely vagy melyek számítanak külső/alaki jogforrásnak!",
+    options:["Kormány","Törvény","Rendelet","Országgyűlés","Törvényerejű rendelet"],
+    correct:[1,2,4]
+  },
+
+  // 7) Mi befolyásolja a cselekvőképességet?
+  { id:"usr-007", type:"mcq", multi:true, topic:"Ptk. – Személyek",
+    text:"Jelölje meg, hogy az alábbiak közül mi befolyásolja az ember cselekvőképességét a jog szerint!",
+    options:["Állampolgárság megléte","Gondnok nyilatkozata","Mentális állapot","Törvényes képviselő nyilatkozata","Kor"],
+    correct:[2,4]
+  },
+
+  // 8) A cselekvőképesség fajtái
+  { id:"usr-008", type:"mcq", multi:true, topic:"Ptk. – Cselekvőképesség",
+    text:"Jelölje meg, hogy az alábbi állításokból melyik, melyek a cselekvőképesség fajtái!",
+    options:["Teljesen cselekvőképes","Általánosan cselekvőképes","Speciálisan cselekvőképes","Teljesen cselekvőképtelen","Korlátozottan cselekvőképes"],
+    correct:[0,3,4]
+  },
+
+  // 9) GT – alap állítások (a több-üres kérdés szétszedve)
+  { id:"usr-009a", type:"fill", topic:"Gt – Alapok",
+    text:"A gazdasági társaságok ______ fő szervvel rendelkeznek.",
+    correctText:["4","négy"]
+  },
+  { id:"usr-009b", type:"fill", topic:"Gt – Alapok",
+    text:"A tagok gyűlése a ______.",
+    correctText:["legfőbb szerv","legfobb szerv","legfőbb","legfobb","taggyűlés","taggyules"]
+  },
+  { id:"usr-009c", type:"fill", topic:"Gt – Alapok",
+    text:"A társaságok alapítása ______ történik.",
+    correctText:["létesítő okirattal","letesito okirattal","létesítő okirat","társasági szerződéssel","alapító okirattal","alapszabállyal"]
+  },
+  { id:"usr-009d", type:"fill", topic:"Gt – Alapok",
+    text:"A létesítő okiratot a ______ bejegyzésére kell benyújtani.",
+    correctText:["cégbírósághoz","cégbíróságra","cégbíróság","cegbirósághoz","cegbiróságra","cegbiróság"]
+  },
+  { id:"usr-009e", type:"fill", topic:"Gt – Alapok",
+    text:"Amíg a bejegyzés meg nem történik, a társaság ______ működik.",
+    correctText:["előtársaságként","elotarsasagkent"]
+  },
+
+  // 10) Ptk – az öt jogi személyi forma (szétszedve)
+  { id:"usr-010a", type:"fill", topic:"Ptk – Jogi személyek",
+    text:"A Ptk. öt ______ szabályoz.",
+    correctText:["jogi személyt","jogi személyi formát","jogi személy","jogi személyek"]
+  },
+  { id:"usr-010b", type:"fill", topic:"Ptk – Jogi személyek",
+    text:"Rendszeres üzleti tevékenységet folytató szervezet: ______.",
+    correctText:["gazdasági társaság","gazdasagi tarsasag"]
+  },
+  { id:"usr-010c", type:"fill", topic:"Ptk – Jogi személyek",
+    text:"A tagok gazdasági és társadalmi szükségleteinek kielégítésére szolgáló forma: ______.",
+    correctText:["szövetkezet","szovetkezet"]
+  },
+  { id:"usr-010d", type:"fill", topic:"Ptk – Jogi személyek",
+    text:"Ha csak tőkét egyesítenek az alapításkor, ______ van szó.",
+    correctText:["alapítványról","alapítvány","alapitvanyrol","alapitvany"]
+  },
+  { id:"usr-010e", type:"fill", topic:"Ptk – Jogi személyek",
+    text:"Az alapítvány nem folytathat üzletszerűen ______ tevékenységet.",
+    correctText:["gazdasági","gazdasagi"]
+  },
+
+  // 11) Jogszabállyal szembeni követelmények
+  { id:"usr-011", type:"mcq", multi:true, topic:"Jogi alapok",
+    text:"Jelölje meg, hogy az alábbi elemek közül mely követelményeket támasztanak a joggal szemben!",
+    options:["Ellentmondás-mentes","Lehetségest követelő (reális)","Közzétett","Egyszerű","Általános"],
+    correct:[0,1,2,4]
+  },
+
+  // 12) Gt – alapítás/ellenőrzés/kisebbség (szétszedve)
+  { id:"usr-012a", type:"fill", topic:"Gt – Alapítás",
+    text:"A gazdasági társaságok alapításakor ______ kell teljesíteni, ami történhet pénzzel, illetve dolog, jog vagy követelés rendelkezésre bocsátásával.",
+    correctText:["vagyoni hozzájárulást","vagyoni hozzajarulast","vagyoni hozzájárulás","apportot","apport"]
+  },
+  { id:"usr-012b", type:"fill", topic:"Gt – Ellenőrzés",
+    text:"A társaságok belső ellenőrzését a ______ látja el.",
+    correctText:["felügyelőbizottság","felügyelő bizottság","felugyelobizottsag","fb"]
+  },
+  { id:"usr-012c", type:"fill", topic:"Gt – Ellenőrzés",
+    text:"A felügyelőbizottság alapítása ajánlott, és három esetben ______ (pl. Nyrt.).",
+    correctText:["kötelező","kotelezo"]
+  },
+  { id:"usr-012d", type:"fill", topic:"Jogi személy – Megszűnés",
+    text:"A társaság megszűnhet ______, pl. ha átalakul vagy szétválik.",
+    correctText:["jogutódlással","jogutodlassal"]
+  },
+  { id:"usr-012e", type:"fill", topic:"Gt – Kisebbségi jogok",
+    text:"Kisebbségi jogok a szavazatok ______%-át elérő tulajdon esetén illetik meg a tagokat.",
+    correctText:["5","öt","5%","ot"]
+  },
+
+  // 13) (ismét) Jogszabály hatálya – ha kell külön tételként is
+  { id:"usr-013", type:"mcq", multi:true, topic:"Jogi alapok / Hatály",
+    text:"Jelölje meg, hogy milyen hatályossága lehet egy jogszabálynak!",
+    options:["Eszmei","Tárgyi","Fizikai","Személyi","Területi","Időbeli"],
+    correct:[3,4,5]
+  },
+
+  // 14) Jogi személy létesítése – NEM igaz állítások
+  { id:"usr-014", type:"mcq", multi:true, topic:"Ptk – Jogi személy",
+    text:"Jelölje meg, hogy melyek nem igazak a jogi személy létesítésére!",
+    options:[
+      "A jogi személy a létesítő okirat tagok általi elfogadásával jön létre.",
+      "A jogi személy a bírósági nyilvántartásba vétellel jön létre.",
+      "Jogszabályban meghatározott jogi személy szabadon létesíthető.",
+      "Jogi személy csak határozatlan időre jöhet létre."
+    ],
+    correct:[0,3]
+  },
+
+  // 15) Mi lehet létesítő okirat?
+  { id:"usr-015", type:"mcq", multi:true, topic:"Ptk – Jogi személy",
+    text:"Jelölje meg, hogy az alábbiak közül mi lehet létesítő okirat!",
+    options:["Alapító okirat","Főszabály","Társasági szerződés","Alapszabály"],
+    correct:[0,2,3]
+  },
+
+  // 16) Operatív irányítás
+  { id:"usr-016", type:"mcq", multi:true, topic:"Gt – Vezetés",
+    text:"A gazdasági társaság operatív irányítását (szakmai vezetését) elláthatja",
+    options:["az igazgatóság","egy ügyvezető","több ügyvezető","az elnökség","az elnök"],
+    correct:[0,1,2]
+  },
+
+  // 17) Alaptörvény – személyiségi jogok (szétszedve)
+  { id:"usr-018a", type:"fill", topic:"Alaptörvény / Személyiségi jogok",
+    text:"A személyhez fűződő jogok megsértése esetén ______ követelhető.",
+    correctText:["sérelemdíj","serelemdij"]
+  },
+  { id:"usr-018b", type:"fill", topic:"Alaptörvény / Személyiségi jogok",
+    text:"Egyes személyiségi jogsértéseket nemcsak a polgári jog, hanem a ______ is szankcionál.",
+    correctText:["Btk","büntető törvénykönyv","Büntető Törvénykönyv","bunteto torvenykonyv"]
+  },
+  { id:"usr-018c", type:"fill", topic:"Alaptörvény / Személyiségi jogok",
+    text:"Durva és indokolatlanul bántó véleménynyilvánítás büntetőjogi tényállása: ______.",
+    correctText:["becsületsértés","becsuletsertes"]
+  }
+);
+
 
 
 const QUESTIONS = QUESTION_BANK;
@@ -1237,17 +1402,16 @@ const QUESTIONS = QUESTION_BANK;
 const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
 const pickRandom = (arr, n) => shuffle(arr).slice(0, n);
 
-  // --- Normalizálás: kisbetű, ékezetek eldobása, felesleges szóközök kiváltása
+
 function normalize(s){
   return (s ?? "")
     .toString()
     .trim()
     .toLowerCase()
-    .normalize("NFD")                // ékezetek szétbontása
-    .replace(/[\u0300-\u036f]/g, "") // ékezet komponensek törlése
-    .replace(/\s+/g, " ");           // többszörös szóköz -> egy
+    .normalize("NFD")              
+    .replace(/[\u0300-\u036f]/g, "") 
+    .replace(/\s+/g, " ");           
 }
-// Levenshtein-távolság (beszúrás/törlés/helyettesítés) – kis implementáció
 function levenshtein(a, b){
   const m = a.length, n = b.length;
   const dp = Array.from({length: m+1}, () => Array(n+1).fill(0));
@@ -1266,21 +1430,18 @@ function levenshtein(a, b){
   return dp[m][n];
 }
 
-// Elfogadás: pontos egyezés normalizálva VAGY legfeljebb 1 betű eltérés
 function isAcceptable(userInput, accepted){
-  // accepted lehet string vagy "a|b|c" több megoldás esetén
   const variants = Array.isArray(accepted) ? accepted : String(accepted).split("|");
   const u = normalize(userInput);
   return variants.some(v => {
     const t = normalize(v);
     if (!t) return false;
     if (u === t) return true;
-    return levenshtein(u, t) <= 1; // <=1 betű elütés elfogadva
+    return levenshtein(u, t) <= 3; 
   });
 }
 
 
-/* ======= Állapot ======= */
 let currentSet = [];
 let score = 0;
 let answered = 0;
@@ -1545,7 +1706,7 @@ function finalizeScore(){
 /* ======= Felső gombok – egyszeri kötés ======= */
 if (!window.__topBtnsBound){
   document.getElementById('startBtn').addEventListener('click', ()=>{
-    const n = Math.min(20, QUESTIONS.length);
+    const n = Math.min(50, QUESTIONS.length);
     renderTest(pickRandom(QUESTIONS, n));
   });
 
@@ -1586,7 +1747,8 @@ if (!window.__topBtnsBound){
     unseenTabBtn.classList.add('active');
   });
 
-  window.__topBtnsBound = true;
+  // Csávoka fül – CSAK a Csávoka-bankból származó kérdések
+ 
 }
 
 /* ======= Hibáim lap ======= */
@@ -1680,7 +1842,7 @@ document.getElementById('practiceUnseen10').addEventListener('click', ()=>{
 document.getElementById('practiceUnseen20').addEventListener('click', ()=>{
   const unseen = getUnseen();
   if (unseen.length===0){ alert("Nincs több új (nem látott) kérdés."); return; }
-  renderTest(pickRandom(unseen, Math.min(30, unseen.length)));
+  renderTest(pickRandom(unseen, Math.min(80, unseen.length)));
 });
 
 document.getElementById('clearSeenBtn').addEventListener('click', ()=>{
