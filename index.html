@@ -549,7 +549,7 @@ function handleCheck(q){
   }else{
     const input = card.querySelector('input[type="text"]');
     const given = normalize(input.value);
-    const ok = (q.correctText||[]).some(acc=>normalize(acc)===given);
+    const ok = (q.correct||[]).some(acc=>normalize(acc)===given);
 
     isCorrect = ok;
     input.disabled = true;
@@ -559,7 +559,7 @@ function handleCheck(q){
     }else{
       input.style.borderColor = "rgba(239,68,68,.8)";
       input.style.background = "rgba(239,68,68,.08)";
-      const sol = "Megoldás: " + (q.correctText||[]).join("  |  ");
+      const sol = "Megoldás: " + (q.correct||[]).join("  |  ");
       const solDiv = document.createElement('div');
       solDiv.className = 'meta';
       solDiv.textContent = sol;
@@ -599,7 +599,7 @@ function showSolution(q){
   } else {
     const input = card.querySelector('input[type="text"]');
     input.disabled = true;
-    const sol = "Megoldás: " + (q.correctText||[]).join("  |  ");
+    const sol = "Megoldás: " + (q.correct||[]).join("  |  ");
     if(!card.querySelector('.footer .meta + .meta')){
       const solDiv = document.createElement('div');
       solDiv.className = 'meta';
@@ -777,4 +777,5 @@ updateResultMistakesBtn();
 </script>
 </body>
 </html>
+
 
