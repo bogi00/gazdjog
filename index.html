@@ -773,7 +773,7 @@ function finalizeScore(){
 /* ======= Felső gombok – egyszeri kötés ======= */
 if (!window.__topBtnsBound){
   document.getElementById('startBtn').addEventListener('click', ()=>{
-    const n = Math.min(50, QUESTIONS.length);
+    const n = Math.min(20, QUESTIONS.length);
     renderTest(pickRandom(QUESTIONS, n));
   });
 
@@ -924,6 +924,7 @@ updateResultMistakesBtn();
 </script>
 </body>
 </html>
+
 
 
 
