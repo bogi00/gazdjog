@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -39,7 +40,7 @@
 <body>
 <div class="wrap">
   <div class="card">
-    <div class="h1">Vállalatgazd alapjai gyakorló teszt</div>
+    <div class="h1">Gazdjog gyakorló teszt</div>
     <div class="row tabs" style="margin-top:10px">
       <button id="startBtn" class="btn primary" type="button">Új teszt indítása (20 véletlen kérdés)</button>
       <button id="showAllBtn" class="btn ghost" type="button">Összes kérdés listázása (tanuláshoz)</button>
@@ -97,337 +98,895 @@
 
 <script>
  
-const QUESTION_BANK =[
-  { id:"targy-tf-001", type:"mcq", multi:false, topic:"Tárgyi eszköz gazdálkodás", text:"A tárgyi eszközök fokozatosan, több részben adják át értéküket az általuk előállított termékeknek.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"targy-tf-002", type:"mcq", multi:false, topic:"Tárgyi eszköz gazdálkodás", text:"A tárgyi eszközök teljes mértékben mobilak, könnyen áthelyezhetők más vállalkozásokhoz.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"targy-tf-003", type:"mcq", multi:false, topic:"Tárgyi eszközök csoportosítása", text:"A tárgyi eszközök közé tartoznak az ingatlanok, gépek, berendezések és tenyészállatok.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"targy-tf-004", type:"mcq", multi:false, topic:"Tárgyi eszközök csoportosítása", text:"A tárgyi eszközök rendeltetés szerint csak üzletkörön belüliek lehetnek.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"targy-tf-005", type:"mcq", multi:false, topic:"Beruházások", text:"A beruházás jövőbeni eredmény elérése érdekében történő megelőlegezett áldozatvállalás.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"targy-tf-006", type:"mcq", multi:false, topic:"Beruházások", text:"A beruházás mindig üzembe helyezett tárgyi eszközt jelent.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"targy-mc-001", type:"mcq", multi:true, topic:"Beruházások", text:"Melyek a beruházások fő típusai összefüggés szerint?", options:["Alapberuházás","Járulékos beruházás","Kapcsolódó beruházás","Támogatott beruházás"], correct:[0,1,2] },
-  { id:"targy-mc-002", type:"mcq", multi:true, topic:"Beruházások", text:"Milyen módon valósulhat meg egy beruházás?", options:["Megbízásos","Saját kivitelezésű","Vegyes","Állami kötelező"], correct:[0,1,2] },
-  { id:"targy-tf-007", type:"mcq", multi:false, topic:"Beruházások", text:"A beruházás forrásai között szerepelhet a lízing is.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"targy-tf-008", type:"mcq", multi:false, topic:"Beruházások", text:"A beruházás csak saját forrásból finanszírozható.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"targy-tf-009", type:"mcq", multi:false, topic:"Tárgyi eszközök élettartama", text:"A tárgyi eszköz normatív élettartama figyelembe veszi a gazdasági avulást.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"targy-tf-010", type:"mcq", multi:false, topic:"Tárgyi eszközök élettartama", text:"A tényleges működési időtartam mindig hosszabb, mint a normatív élettartam.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"targy-mc-003", type:"mcq", multi:true, topic:"Tárgyi eszköz megválasztása", text:"Mely tényezők befolyásolják egy tárgyi eszköz megválasztását?", options:["Üzemeltetési költségek","Meghibásodás esélye","Karbantarthatóság","Piaci versenytársak száma"], correct:[0,1,2] },
-  { id:"targy-tf-011", type:"mcq", multi:false, topic:"Tárgyi eszköz értékelése", text:"A tárgyi eszközök értékelésének egyik módja a könyv szerinti érték.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"targy-mc-004", type:"mcq", multi:true, topic:"Tárgyi eszköz értékelése", text:"Melyek a tárgyi eszközök értékelésének fő módszerei?", options:["Könyv szerinti érték","Újrabeszerzési érték","Hozamok tőkésített értéke","Piaci kamatláb"], correct:[0,1,2] },
-  { id:"targy-tf-012", type:"mcq", multi:false, topic:"Karbantartás", text:"A reaktív karbantartás célja a meghibásodás megelőzése.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"targy-tf-013", type:"mcq", multi:false, topic:"Karbantartás", text:"A prediktív karbantartás a meghibásodás előrejelzésén alapul.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"targy-mc-005", type:"mcq", multi:true, topic:"Karbantartás", text:"Melyek tartoznak a tárgyi eszközök karbantartási típusai közé?", options:["Reaktív","Preventív","Proaktív","Prediktív"], correct:[0,1,2,3] },
-  { id:"targy-tf-014", type:"mcq", multi:false, topic:"Kapacitásmenedzsment", text:"A kapacitásmenedzsment célja, hogy a kapacitás összhangban legyen a piaci igényekkel.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"targy-mc-006", type:"mcq", multi:true, topic:"Kapacitásmenedzsment", text:"Milyen eszközökkel lehet módosítani a termelési kapacitást?", options:["Műszakrend változtatása","Munkaórák módosítása","Termékjellemzők módosítása","Kötelező leállás"], correct:[0,1,2] },
-  { id:"targy-tf-015", type:"mcq", multi:false, topic:"Igénymenedzsment", text:"Az igénymenedzsment célja, hogy a piaci igények alkalmazkodjanak a kapacitáshoz.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"targy-mc-007", type:"mcq", multi:true, topic:"Igénymenedzsment", text:"Milyen eszközökkel lehet befolyásolni a keresletet?", options:["Árpolitika","Marketing","Előrendelés","Termelés kiszervezése"], correct:[0,1,2] },
-  { id:"targy-tf-016", type:"mcq", multi:false, topic:"Amortizáció", text:"Az amortizáció a tárgyi eszközök értékének fokozatos csökkenése.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"targy-mc-008", type:"mcq", multi:true, topic:"Amortizáció", text:"Melyek az amortizáció fő funkciói?", options:["Értékátvitel","Pótlási alap képzése","Bővítés finanszírozása","Jövedelemszabályozás"], correct:[0,1,2,3] },
-  { id:"targy-tf-017", type:"mcq", multi:false, topic:"Amortizáció", text:"A teljesítményarányos amortizáció az idő múlásán alapul.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"targy-mc-009", type:"mcq", multi:true, topic:"Amortizáció", text:"Melyek az időarányos amortizáció típusai?", options:["Lineáris","Degresszív","Progresszív","Teljesítményarányos"], correct:[0,1,2] },
-  { id:"targy-tf-018", type:"mcq", multi:false, topic:"Selejtezés", text:"A selejtezés egyik célja a felesleges eszközök azonosítása és eltávolítása.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"targy-tf-019", type:"mcq", multi:false, topic:"Selejtezés", text:"A feleslegessé vált eszközöket minden esetben meg kell semmisíteni.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"targy-mc-010", type:"mcq", multi:true, topic:"Selejtezés", text:"Mely szempontokat kell figyelembe venni a selejtezés során?", options:["Feleslegessé válás okai","Tárolás és nyilvántartás","Értékesíthetőség","Megsemmisítés költsége"], correct:[0,1,2,3] }
+const QUESTION_BANK=[
+  // --- Csődeljárás, felszámolás, szerkezetátalakítás ---
+
+  {
+    id:"csod-mc-001",
+    type:"mcq",
+    multi:false,
+    topic:"Csődeljárás, szerkezetátalakítás",
+    text:"Melyik eljárás kapcsolódik a fizetésképtelenség valószínűségéhez?",
+    options:[
+      "Csődeljárás",
+      "Felszámolási eljárás",
+      "Szerkezetátalakítási eljárás",
+      "Végelszámolás"
+    ],
+    correct:[2]
+  },
+  {
+    id:"csod-mc-002",
+    type:"mcq",
+    multi:true,
+    topic:"Szerkezetátalakítási eljárás",
+    text:"Mi a célja a szerkezetátalakítási eljárásnak?",
+    options:[
+      "A vállalkozás megszüntetése",
+      "A fizetésképtelenség megelőzése",
+      "A hitelezők teljes kielégítése",
+      "A gazdálkodás konszolidálása"
+    ],
+    correct:[1,3]
+  },
+  {
+    id:"csod-mc-003",
+    type:"mcq",
+    multi:false,
+    topic:"Csődeljárás",
+    text:"Ki kezdeményezheti a csődeljárást?",
+    options:[
+      "Csak az adós",
+      "Csak a hitelező",
+      "Az adós és a hitelező egyaránt",
+      "A cégbíróság hivatalból"
+    ],
+    correct:[0]
+  },
+  {
+    id:"csod-mc-004",
+    type:"mcq",
+    multi:false,
+    topic:"Csődjog",
+    text:"Melyik törvény szabályozza a csődeljárást és a felszámolási eljárást?",
+    options:[
+      "2021. évi LXIV. törvény",
+      "1991. évi XLIX. törvény",
+      "2013. évi V. törvény",
+      "2006. évi IV. törvény"
+    ],
+    correct:[1]
+  },
+  {
+    id:"csod-mc-005",
+    type:"mcq",
+    multi:false,
+    topic:"Felszámolási eljárás",
+    text:"Melyik bíróság illetékes a felszámolási eljárásban?",
+    options:[
+      "A Kúria",
+      "A törvényszékek",
+      "A járásbíróságok",
+      "Az ítélőtáblák"
+    ],
+    correct:[1]
+  },
+  {
+    id:"csod-mc-006",
+    type:"mcq",
+    multi:true,
+    topic:"Csődeljárás",
+    text:"Mi történik a csődeljárás megindításakor?",
+    options:[
+      "Az adós fizetési haladékot kap (moratórium)",
+      "Automatikusan felszámolási eljárás indul",
+      "A cégnevéhez a „cs. a.” toldat kerül",
+      "A hitelezők automatikusan kielégítést kapnak"
+    ],
+    correct:[0,2]
+  },
+  {
+    id:"csod-mc-007",
+    type:"mcq",
+    multi:true,
+    topic:"Moratórium",
+    text:"Melyik eljárásban van moratórium?",
+    options:[
+      "Csődeljárás",
+      "Felszámolási eljárás",
+      "Végelszámolás",
+      "Szerkezetátalakítási eljárás"
+    ],
+    correct:[0,3]
+  },
+  {
+    id:"csod-mc-008",
+    type:"mcq",
+    multi:true,
+    topic:"Moratórium",
+    text:"Mire nem vonatkozik a moratórium?",
+    options:[
+      "Munkabér",
+      "Közműdíjak",
+      "Áruhiteltartozások",
+      "A vagyonfelügyelő díja"
+    ],
+    correct:[0,1,3]
+  },
+  {
+    id:"csod-mc-009",
+    type:"mcq",
+    multi:true,
+    topic:"Csődeljárás",
+    text:"Mikor nem indulhat csődeljárás?",
+    options:[
+      "Ha az adóssal szemben felszámolási eljárás már folyamatban van",
+      "Ha az adós nem fizet",
+      "Ha szerkezetátalakítási terv végrehajtása folyamatban van",
+      "Ha az adós nem nyújt be csődeljárás iránti kérelmet"
+    ],
+    correct:[0,2,3]
+  },
+  {
+    id:"csod-mc-010",
+    type:"mcq",
+    multi:true,
+    topic:"Pénzügyi reorganizáció",
+    text:"Mi a célja a pénzügyi reorganizációnak?",
+    options:[
+      "A társaság megszüntetése",
+      "A felszámolási eljárás megelőzése",
+      "A hitelezők gyors kielégítése",
+      "A pénzügyi struktúra új alapokra helyezése"
+    ],
+    correct:[1,3]
+  },
+  {
+    id:"csod-mc-011",
+    type:"mcq",
+    multi:true,
+    topic:"Csődeljárás szereplői",
+    text:"Ki működik közre a csődeljárásban?",
+    options:[
+      "A bíróság",
+      "A szerkezetátalakítási szakértő",
+      "A felszámoló",
+      "A vagyonfelügyelő"
+    ],
+    correct:[0,3]
+  },
+  {
+    id:"csod-mc-012",
+    type:"mcq",
+    multi:false,
+    topic:"Csődeljárás",
+    text:"Melyik eljárásban van egyezségi tárgyalás?",
+    options:[
+      "Csődeljárás",
+      "Felszámolási eljárás",
+      "Szerkezetátalakítási eljárás",
+      "Végelszámolás"
+    ],
+    correct:[0]
+  },
+  {
+    id:"csod-mc-013",
+    type:"mcq",
+    multi:false,
+    topic:"Felszámolási eljárás",
+    text:"Melyik eljárásban lehet felszámolót kirendelni?",
+    options:[
+      "Csődeljárás",
+      "Felszámolási eljárás",
+      "Szerkezetátalakítási eljárás",
+      "Végelszámolás"
+    ],
+    correct:[1]
+  },
+  {
+    id:"csod-mc-014",
+    type:"mcq",
+    multi:false,
+    topic:"Felszámoló",
+    text:"Melyik szervezet lehet felszámoló?",
+    options:[
+      "Bármely gazdasági társaság",
+      "Csak az állam",
+      "A felszámolók névjegyzékében szereplő szervezet",
+      "A cégbíróság által kijelölt magánszemély"
+    ],
+    correct:[2]
+  },
+  {
+    id:"csod-mc-015",
+    type:"mcq",
+    multi:false,
+    topic:"Ideiglenes vagyonfelügyelő",
+    text:"Mikor rendelhető ki ideiglenes vagyonfelügyelő?",
+    options:[
+      "Ha az adós kéri",
+      "Ha egy hitelező valószínűsíti a követelésének veszélyeztetettségét",
+      "Ha a bíróság hivatalból elrendeli",
+      "Ha a pénzügyi reorganizációs terv sikertelen volt"
+    ],
+    correct:[1]
+  },
+  {
+    id:"csod-mc-016",
+    type:"mcq",
+    multi:true,
+    topic:"Csődeljárás",
+    text:"Mi történik, ha az egyezség nem jön létre a csődeljárásban?",
+    options:[
+      "A bíróság megszünteti a csődeljárást",
+      "Felszámolási eljárás indul",
+      "Az adós mentesül tartozásai alól",
+      "Új csődeljárás indul automatikusan"
+    ],
+    correct:[0,1]
+  },
+  {
+    id:"csod-mc-017",
+    type:"mcq",
+    multi:false,
+    topic:"Felszámolási eljárás",
+    text:"Melyik eljárásban van lehetőség egyszerűsített felszámolásra?",
+    options:[
+      "Csődeljárás",
+      "Felszámolási eljárás",
+      "Szerkezetátalakítási eljárás",
+      "Végelszámolás"
+    ],
+    correct:[1]
+  },
+  {
+    id:"csod-mc-018",
+    type:"mcq",
+    multi:true,
+    topic:"Fizetésképtelenség",
+    text:"Mikor állapítja meg a bíróság az adós fizetésképtelenségét?",
+    options:[
+      "Ha az adós a hitelező követelését nem vitatja",
+      "Ha az adós a fizetési felszólítást követő 20 napon belül sem teljesít",
+      "Ha a hitelező nem nyújt be kérelmet",
+      "Ha a végrehajtás eredménytelen volt"
+    ],
+    correct:[1,3]
+  },
+  {
+    id:"csod-mc-019",
+    type:"mcq",
+    multi:false,
+    topic:"Felszámolási eljárás",
+    text:"Mi a felszámolási eljárás célja?",
+    options:[
+      "A társaság pénzügyi reorganizációja",
+      "A fizetésképtelenség megszüntetése",
+      "A gazdálkodó szervezet jogutód nélküli megszüntetése",
+      "A hitelezők követeléseinek teljes kielégítése"
+    ],
+    correct:[2]
+  },
+  {
+    id:"csod-mc-020",
+    type:"mcq",
+    multi:false,
+    topic:"Vezető tisztségviselő felelőssége",
+    text:"Mikor lehet megállapítási keresetet benyújtani a volt vezető ellen?",
+    options:[
+      "A felszámolás jogerős lezárását követő 60 napon belül",
+      "A csődeljárás alatt",
+      "A reorganizációs terv elfogadása után",
+      "A felszámolási zárómérleg benyújtása után"
+    ],
+    correct:[0]
+  }
 ];
-  QUESTION_BANK.push(
-  // --- Tárgyi eszköz-gazdálkodás ---
-  { id:"hard-m-001", type:"mcq", multi:true, topic:"Amortizáció", text:"Mely tényezők befolyásolják a tárgyi eszközök amortizációs politikáját?", options:[
-    "A vállalat számviteli politikája",
-    "A technológiai fejlődés üteme",
-    "A piaci kereslet változása",
-    "Az eszköz műszaki állapota"
-  ], correct:[0,1,3] },
-
-  { id:"hard-m-002", type:"mcq", multi:true, topic:"Beruházás", text:"Mely tényezők alapján értékelhető egy beruházás megtérülése?", options:[
-    "Kezdeti beruházási költség",
-    "Várható pénzáramlások",
-    "Tőkeáttétel mértéke",
-    "Diszkontráta (kamatláb)"
-  ], correct:[0,1,3] },
-
-  { id:"hard-m-003", type:"mcq", multi:true, topic:"Tárgyi eszköz értékelése", text:"Mikor szükséges rendkívüli értékcsökkenés elszámolása?", options:[
-    "Ha az eszköz fizikai állapota romlott",
-    "Ha az eszköz forgalmi értéke tartósan lecsökkent",
-    "Ha az eszköz jövedelemtermelő képessége nőtt",
-    "Ha a használata megszűnt"
-  ], correct:[0,1,3] },
-
-  { id:"hard-m-004", type:"mcq", multi:true, topic:"Karbantartás", text:"Mely állítások igazak a preventív karbantartásra?", options:[
-    "A hibák megelőzésére szolgál",
-    "A hibák javítására szolgál",
-    "Célja a gépek élettartamának növelése",
-    "Csökkenti az állásidőt"
-  ], correct:[0,2,3] },
-
-  // --- Vagyongazdálkodás ---
-  { id:"hard-m-005", type:"mcq", multi:true, topic:"Vállalati vagyon", text:"Mely tényezők befolyásolják a vállalat tőkeszerkezetét?", options:[
-    "Finanszírozási költségek",
-    "Kockázati szint",
-    "Árbevétel nagysága",
-    "Rendelkezésre álló idegen források"
-  ], correct:[0,1,3] },
-
-  { id:"hard-m-006", type:"mcq", multi:true, topic:"Ipar 4.0", text:"Mely elemek jellemzik az Ipar 4.0 korszakát?", options:[
-    "Kiber-fizikai rendszerek",
-    "Felhőalapú adatmegosztás",
-    "Kézi nyilvántartás",
-    "Mesterséges intelligencia"
-  ], correct:[0,1,3] },
-
-  { id:"hard-m-007", type:"mcq", multi:true, topic:"Innováció", text:"Mely tényezők ösztönzik az innovációt a vállalatoknál?", options:[
-    "Piaci verseny",
-    "Kormányzati támogatás",
-    "Merev szervezeti struktúra",
-    "Technológiai fejlődés"
-  ], correct:[0,1,3] },
-
-  { id:"hard-m-008", type:"mcq", multi:true, topic:"KKV szektor", text:"Mely jellemzők igazak a KKV-k működésére?", options:[
-    "Korlátozott tőkeellátottság",
-    "Gyors döntéshozatal",
-    "Erős piaci befolyás",
-    "Személyes vezetési stílus"
-  ], correct:[0,1,3] },
-
-  // --- Költséggazdálkodás / KMH elemzés ---
-  { id:"hard-m-009", type:"mcq", multi:true, topic:"Költségek", text:"Mely állítások igazak a költség fogalmára?", options:[
-    "A bevétel érdekében felhasznált erőforrások értéke",
-    "Mindig pénzkiadással jár",
-    "Lehet közvetlen vagy közvetett",
-    "Befolyásolja a fedezeti pontot"
-  ], correct:[0,2,3] },
-
-  { id:"hard-m-010", type:"mcq", multi:true, topic:"Költségek csoportosítása", text:"Milyen szempontok alapján lehet a költségeket csoportosítani?", options:[
-    "Költségnem szerint",
-    "Elszámolhatóság szerint",
-    "Költségviselő szerint",
-    "Adókulcs alapján"
-  ], correct:[0,1,2] },
-
-  { id:"hard-m-011", type:"mcq", multi:true, topic:"KMH elemzés", text:"A KMH elemzés feltételezi, hogy...", options:[
-    "A fix költség állandó a releváns szakaszban",
-    "A változó költség arányos a mennyiséggel",
-    "A fedezet független a termelési szinttől",
-    "Az egységár állandó"
-  ], correct:[0,1,3] },
-
-  { id:"hard-m-012", type:"mcq", multi:true, topic:"Működési áttétel", text:"Mi jellemzi a magas működési áttételt?", options:[
-    "Nagy fix költség arány",
-    "Kis változó költség arány",
-    "Magas kockázat a profitra nézve",
-    "Kisebb fedezeti pont"
-  ], correct:[0,1,2] },
-
-  // --- Üzleti terv és stratégia ---
-  { id:"hard-m-013", type:"mcq", multi:true, topic:"Stratégia", text:"Mely állítások igazak a stratégiai tervezésre?", options:[
-    "Hosszú távú irányokat határoz meg",
-    "Rövid távú operatív döntésekről szól",
-    "Kapcsolódik a vállalat küldetéséhez",
-    "Alapja az üzleti tervnek"
-  ], correct:[0,2,3] },
-
-  { id:"hard-m-014", type:"mcq", multi:true, topic:"Üzleti terv", text:"Melyek az üzleti terv fő funkciói?", options:[
-    "Kommunikáció a befektetők felé",
-    "A vállalati működés koordinálása",
-    "A pénzügyi kimutatások kiváltása",
-    "Döntéstámogatás a vezetés számára"
-  ], correct:[0,1,3] },
-
-  { id:"hard-m-015", type:"mcq", multi:true, topic:"Mesterköltségvetés", text:"A mesterköltségvetés az alábbi részekből épül fel:", options:[
-    "Értékesítési terv",
-    "Termelési terv",
-    "Kutatási terv",
-    "Pénzügyi terv"
-  ], correct:[0,1,3] },
-
-  { id:"hard-m-016", type:"mcq", multi:true, topic:"Pénzügyi terv", text:"Mely kimutatások tartoznak a pénzügyi tervhez?", options:[
-    "Mérleg",
-    "Cash-flow kimutatás",
-    "Eredménykimutatás",
-    "Fedezeti pont elemzés"
-  ], correct:[0,1,2] },
-
-  // --- Vállalati gazdaságtan ---
-  { id:"hard-m-017", type:"mcq", multi:true, topic:"Versenyképesség", text:"Mely tényezők javítják a vállalat versenyképességét?", options:[
-    "Innováció",
-    "Minőségfejlesztés",
-    "Költségcsökkentés",
-    "Szabályozások megsértése"
-  ], correct:[0,1,2] },
-
-  { id:"hard-m-018", type:"mcq", multi:true, topic:"Fenntarthatóság", text:"A fenntarthatóság három pillére közül melyek tartoznak ide?", options:[
-    "Gazdasági",
-    "Társadalmi",
-    "Környezeti",
-    "Politikai"
-  ], correct:[0,1,2] },
-
-  { id:"hard-m-019", type:"mcq", multi:true, topic:"Finanszírozás", text:"Melyek a külső finanszírozás hátrányai?", options:[
-    "Kamatfizetési kötelezettség",
-    "Függőség a hitelezőktől",
-    "Tulajdonosi befolyás növekedése",
-    "Likviditási kockázat"
-  ], correct:[0,1,3] },
-
-  { id:"hard-m-020", type:"mcq", multi:true, topic:"Kockázatkezelés", text:"Mely módszerek segítik a vállalati kockázat csökkentését?", options:[
-    "Diverzifikáció",
-    "Biztosítás",
-    "Kockázat figyelmen kívül hagyása",
-    "Tartalékképzés"
-  ], correct:[0,1,3] }
-);
 
 QUESTION_BANK.push(
-  { id:"vagyon-tf-001", type:"mcq", multi:false, topic:"Vállalat fogalma", text:"A vállalat olyan önállóan gazdálkodó szervezeti alapegység, amely kockázatot vállalva nyereségnövekedésre és tőkegyarapításra törekszik.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-tf-002", type:"mcq", multi:false, topic:"Ipar 1.0–4.0", text:"Az ipar 1.0 a digitalizáció és az internet alapú termelés korszaka.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"vagyon-tf-003", type:"mcq", multi:false, topic:"Ipar 2.0", text:"Az ipar 2.0 korszaka a tömeggyártás és az elektromosság elterjedéséhez köthető.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-tf-004", type:"mcq", multi:false, topic:"Ipar 3.0", text:"Az ipar 3.0 korszakát a számítógépek és az információtechnológia fejlődése jellemzi.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-tf-005", type:"mcq", multi:false, topic:"Ipar 4.0", text:"Az ipar 4.0 alapja a digitalizáció és az adatvezérelt működés.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-mc-001", type:"mcq", multi:true, topic:"Ipari forradalmak", text:"Mely korszakok tartoznak az ipari forradalmak fő szakaszai közé?", options:["Ipar 1.0","Ipar 2.0","Ipar 3.0","Ipar 4.0"], correct:[0,1,2,3] },
-  { id:"vagyon-tf-006", type:"mcq", multi:false, topic:"Vállalat érintettjei", text:"A vállalat érintettjei közé tartoznak a tulajdonosok, a dolgozók és a vásárlók is.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-mc-002", type:"mcq", multi:true, topic:"Vállalat érintettjei", text:"Kik tartoznak a vállalat érintettjei közé?", options:["Állam","Versenytársak","Környezet","Tőzsdei brókerek"], correct:[0,1,2] },
-  { id:"vagyon-tf-007", type:"mcq", multi:false, topic:"Vállalat méretek", text:"A mikrovállalkozások legfeljebb 9 főt foglalkoztatnak.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-tf-008", type:"mcq", multi:false, topic:"KKV fogalma", text:"A KKV-k belső bürokráciája általában kicsi, a döntéshozatal gyors.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-tf-009", type:"mcq", multi:false, topic:"KKV szerepe", text:"A KKV-k csekély hatással vannak a nemzetgazdaságra.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"vagyon-mc-003", type:"mcq", multi:true, topic:"KKV jellemzők", text:"Melyek a kis- és középvállalkozások jellemzői?", options:["Gyors döntéshozatal","Kis bürokrácia","Nagy tőkeellátottság","Innovativitás"], correct:[0,1,3] },
-  { id:"vagyon-tf-010", type:"mcq", multi:false, topic:"Innováció", text:"Az innováció új termék, eljárás, piac vagy szervezet létrehozását jelentheti.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-tf-011", type:"mcq", multi:false, topic:"Innováció", text:"Az innováció kizárólag kutatás-fejlesztési tevékenységet jelent.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"vagyon-mc-004", type:"mcq", multi:true, topic:"Innovációs lánc", text:"Mely elemek tartoznak az innovációs láncba?", options:["Ötlet","Kutatás-fejlesztés","Termelés","Értékesítés"], correct:[0,1,2,3] },
-  { id:"vagyon-tf-012", type:"mcq", multi:false, topic:"Egyéni vállalkozás", text:"Az egyéni vállalkozó a saját döntéseiért teljes mértékben felel.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-tf-013", type:"mcq", multi:false, topic:"Egyéni vállalkozás", text:"Az egyéni vállalkozás előnye a nagy tőkeellátottság és a felelősség megoszthatósága.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"vagyon-mc-005", type:"mcq", multi:true, topic:"Egyéni vállalkozás", text:"Melyek az egyéni vállalkozás előnyei?", options:["Gyors reagálás","Kis tőkeigény","A tulajdonos kapja a profitot","Korlátolt felelősség"], correct:[0,1,2] },
-  { id:"vagyon-tf-014", type:"mcq", multi:false, topic:"Vállalkozás bukása", text:"Az új KKV-k gyakran a vezetői tudás hiánya miatt buknak meg.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-tf-015", type:"mcq", multi:false, topic:"Vállalkozás bukása", text:"A tapasztalatlanság nem tartozik a vállalkozások bukásának okai közé.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"vagyon-mc-006", type:"mcq", multi:true, topic:"Bukási okok", text:"Melyek lehetnek a vállalkozás megbukásának okai?", options:["Magas üzemeltetési költségek","Gyenge versenyképesség","Tapasztalatlanság","Túlzott tőketartalék"], correct:[0,1,2] },
-  { id:"vagyon-tf-016", type:"mcq", multi:false, topic:"Vállalkozás vásárlás", text:"Meglévő vállalkozás vásárlása esetén a profit gyorsabban elérhető lehet, mint új alapításnál.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-mc-007", type:"mcq", multi:true, topic:"Vállalkozás vásárlása", text:"Mit érdemes megvizsgálni vállalkozásvásárlás előtt?", options:["Miért adja el a tulajdonos?","Az alkalmazottak képzettségét","Az eladó jövőbeli terveit","Az eladó családi hátterét"], correct:[0,1,2] },
-  { id:"vagyon-tf-017", type:"mcq", multi:false, topic:"Vállalkozás vagyona", text:"A vállalkozás forrásai közé tartoznak a saját és idegen források is.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-tf-018", type:"mcq", multi:false, topic:"Vállalkozás vagyona", text:"A befektetett eszközök rövid távon hasznosulnak a vállalkozás működésében.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"vagyon-mc-008", type:"mcq", multi:true, topic:"Eszközcsoportok", text:"Melyek tartoznak a vállalkozás befektetett eszközei közé?", options:["Immateriális javak","Tárgyi eszközök","Befektetett pénzügyi eszközök","Készletek"], correct:[0,1,2] },
-  { id:"vagyon-tf-019", type:"mcq", multi:false, topic:"Forgóeszközök", text:"A készletek, követelések és pénzeszközök a forgóeszközök közé tartoznak.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-tf-020", type:"mcq", multi:false, topic:"Kft. alapítása", text:"Egy Kft. alapításakor az eszközök és források összesített értéke mindig megegyezik.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"vagyon-mc-009", type:"mcq", multi:true, topic:"Kft. eszköz-forrás", text:"Mely tételek szerepelnek egy Kft. alapításának eszközoldalán?", options:["Tárgyi eszközök","Immateriális javak","Követelések","Készletek","Pénzeszközök"], correct:[0,1,4] },
-  { id:"vagyon-mc-010", type:"mcq", multi:true, topic:"Kft. források", text:"Mely tételek tartozhatnak a Kft. forrásai közé?", options:["Saját tőke","Kötelezettségek","Készletek","Értékpapírok"], correct:[0,1] }
+  // --- Kötelem, szerződések, kártérítés ---
+
+  {
+    id:"kotel-mc-001",
+    type:"mcq",
+    multi:true,
+    topic:"Kötelmi jogviszony",
+    text:"Mi jellemzi a kötelmi jogviszonyt?",
+    options:[
+      "Meghatározott személyek között áll fenn",
+      "A szolgáltatásnak nincs vagyoni értéke",
+      "A felek mellérendeltek",
+      "A kötelezett vagyonával felel a teljesítésért"
+    ],
+    correct:[0,2,3]
+  },
+  {
+    id:"kotel-mc-002",
+    type:"mcq",
+    multi:true,
+    topic:"Kártérítési felelősség",
+    text:"Melyek a kártérítési felelősség előfeltételei?",
+    options:[
+      "Kár",
+      "Jogellenesség",
+      "Okozati összefüggés",
+      "Szerződéskötés"
+    ],
+    correct:[0,1,2]
+  },
+  {
+    id:"kotel-mc-003",
+    type:"mcq",
+    multi:true,
+    topic:"Kártérítési felelősség",
+    text:"Mely esetekben nem jogellenes a károkozás?",
+    options:[
+      "Ha a kár okozását jogszabály megengedi",
+      "Ha szükséghelyzetben arányos kárt okoznak",
+      "Ha a károsult a károkozásba beleegyezett",
+      "Ha a károkozó szándékosan járt el"
+    ],
+    correct:[0,1,2]
+  },
+  {
+    id:"kotel-mc-004",
+    type:"mcq",
+    multi:true,
+    topic:"Vállalkozási szerződés",
+    text:"Jelölje meg, a vállalkozási szerződés alapján a vállalkozót a Ptk. alapján megillető jogokat!",
+    options:[
+      "A vállalkozót zálogjog illeti meg",
+      "Indokolt többletmunkát jogosult elvégezni",
+      "Indokolt pótmunka elvégzése kötelező számára",
+      "Vállalkozói díj illeti meg"
+    ],
+    correct:[0,3]
+  },
+  {
+    id:"kotel-mc-005",
+    type:"mcq",
+    multi:true,
+    topic:"Szerződés fogalma",
+    text:"Mi a szerződés fogalma a Ptk. szerint?",
+    options:[
+      "A felek egyoldalú jognyilatkozata",
+      "A felek kölcsönös és egybehangzó jognyilatkozata",
+      "Joghatás kiváltására irányuló megállapodás",
+      "Csak írásban köthető érvényesen"
+    ],
+    correct:[1,2]
+  },
+  {
+    id:"kotel-mc-006",
+    type:"mcq",
+    multi:true,
+    topic:"Adásvételi szerződés",
+    text:"Melyek az adásvételi szerződés lényeges elemei?",
+    options:[
+      "Az eladó és a vevő személye",
+      "Tulajdonátruházási szándék",
+      "A vételár meghatározása",
+      "Írásbeliség"
+    ],
+    correct:[0,1,2]
+  },
+  {
+    id:"kotel-mc-007",
+    type:"mcq",
+    multi:true,
+    topic:"Szerződés megerősítése",
+    text:"Milyen szerződés megerősítőket sorol fel a Ptk.?",
+    options:[
+      "Jogvesztés kikötése",
+      "Előleg",
+      "Kötbér",
+      "Foglaló"
+    ],
+    correct:[0,2,3]
+  },
+  {
+    id:"kotel-mc-008",
+    type:"mcq",
+    multi:false,
+    topic:"Ajándékozás",
+    text:"Jelölje meg, hogy az ajándék mennyi időn belül követelhető vissza a megfelelő feltételek teljesülése esetén!",
+    options:[
+      "Általános elévülési időn belül",
+      "Egy éven belül",
+      "Három éven belül",
+      "Nem követelhető vissza"
+    ],
+    correct:[0]
+  },
+  {
+    id:"kotel-mc-009",
+    type:"mcq",
+    multi:true,
+    topic:"Kellékszavatosság",
+    text:"Milyen jellemzői vannak a kellékszavatosságnak?",
+    options:[
+      "Fogyasztó és vállalkozás között is fennállhat",
+      "Hibás szolgáltatás esetén érvényesíthető",
+      "Csak ingóságokra vonatkozhat",
+      "Hibás áru cseréjét is lehet követelni"
+    ],
+    correct:[0,1,3]
+  },
+  {
+    id:"kotel-mc-010",
+    type:"mcq",
+    multi:true,
+    topic:"Vállalkozási szerződés",
+    text:"Mi jellemzi a vállalkozási szerződést?",
+    options:[
+      "A megrendelőnek utasítási joga van",
+      "A megrendelő biztosítja a munkavégzés helyét",
+      "A többletmunkát minden esetben el kell végezni",
+      "A vállalkozói díj magában foglalja a munka és az anyag költségét is"
+    ],
+    correct:[0,3]
+  },
+  {
+    id:"kotel-mc-011",
+    type:"mcq",
+    multi:true,
+    topic:"Vállalkozási szerződés",
+    text:"Jelölje meg, hogy a vállalkozó hogyan köteles a tevékenység végzésének feltételeit megszervezni a Ptk. szerint!",
+    options:[
+      "Biztosítania kell a tevékenység biztonságos befejezését",
+      "Biztosítania kell, hogy határidőre befejezze",
+      "Biztosítania kell a gazdaságos elvégzést",
+      "Biztosítania kell a szakszerű elvégzést"
+    ],
+    correct:[0,1,2,3]
+  },
+  {
+    id:"kotel-mc-012",
+    type:"mcq",
+    multi:true,
+    topic:"Kártérítési felelősség",
+    text:"Mit jelent a kártérítési felelősség?",
+    options:[
+      "Aki kárt okoz, köteles a kárt megtéríteni",
+      "Aki jogellenesen kárt okoz, köteles a kárt megtéríteni",
+      "A teljes kárt kell megtéríteni (az elmaradt hasznot is)",
+      "A teljes kár a dolog értékcsökkenését és a javítási költséget jelenti"
+    ],
+    correct:[1,2]
+  },
+  {
+    id:"kotel-mc-013",
+    type:"mcq",
+    multi:true,
+    topic:"Érvénytelenség",
+    text:"Jelölje meg a semmis szerződés eseteit!",
+    options:[
+      "Színlelt szerződés",
+      "Jó erkölcsbe ütköző szerződés",
+      "Uzsorás szerződés",
+      "Lehetetlen szolgáltatásra irányuló szerződés"
+    ],
+    correct:[0,1,2,3]
+  },
+  {
+    id:"kotel-mc-014",
+    type:"mcq",
+    multi:false,
+    topic:"Ajándékozás",
+    text:"Melyek az ajándékozás jellemzői?",
+    options:[
+      "Az adott ajándékot nem lehet visszakérni",
+      "Ha az ajándékozó meggondolja magát, visszakérheti",
+      "Az ajándékozás kétoldalú jogügylet",
+      "Csak kis értékű ingóságot lehet ingyenesen átruházni"
+    ],
+    correct:[2]
+  },
+  {
+    id:"kotel-mc-015",
+    type:"mcq",
+    multi:true,
+    topic:"Kötelmet keletkeztető tények",
+    text:"Jelölje meg a kötelemkeletkeztető jogi tényeket!",
+    options:[
+      "Szerződésből",
+      "Utaló magatartásból",
+      "Károkozásból",
+      "Egyoldalú jognyilatkozatból",
+      "Érvénytelenségből"
+    ],
+    correct:[0,1,2,3]
+  },
+  {
+    id:"kotel-mc-016",
+    type:"mcq",
+    multi:true,
+    topic:"Szerződés megszűnése",
+    text:"Jelölje meg a szerződés megszűnésének eseteit!",
+    options:[
+      "A szolgáltatás teljesítésével",
+      "Személyegyesüléssel",
+      "A kötelezett jogutód nélküli megszűnésével",
+      "Hibás teljesítéssel",
+      "A kötelezett késedelmével"
+    ],
+    correct:[0,1,2]
+  },
+  {
+    id:"kotel-mc-017",
+    type:"mcq",
+    multi:true,
+    topic:"Szerződéstípusok",
+    text:"Jelölje meg, hogy melyek minősülnek vállalkozási szerződésnek!",
+    options:[
+      "Bizományi szerződés",
+      "Szállítmányozási szerződés",
+      "Fuvarozási szerződés",
+      "Kutatási szerződés"
+    ],
+    correct:[2,3]
+  },
+  {
+    id:"kotel-mc-018",
+    type:"mcq",
+    multi:true,
+    topic:"Kötbér",
+    text:"Jelölje meg, hogy mely állítás vagy állítások jellemzik a kötbért!",
+    options:[
+      "Írásban köthető ki",
+      "A bíróság nem mérsékelheti",
+      "Kárátalány funkciót tölt be",
+      "Kötbér után kamat kikötése semmis",
+      "Bánatpénzt jelent"
+    ],
+    correct:[0,2,3]
+  },
+  {
+    id:"kotel-mc-019",
+    type:"mcq",
+    multi:true,
+    topic:"Bérleti szerződés",
+    text:"Jelölje meg, hogy melyek a bérbeadó jogai!",
+    options:[
+      "Ellenőrizheti a bérelt dolog használatát",
+      "Zálogjog illeti meg a bérleti díj erejéig",
+      "Felmondhatja a szerződést, ha a bérlő nem fizet",
+      "Fegyelmezési jog illeti meg a bérlővel szemben"
+    ],
+    correct:[0,1,2]
+  },
+  {
+    id:"kotel-mc-020",
+    type:"mcq",
+    multi:true,
+    topic:"Szerződés megerősítése",
+    text:"Jelölje meg, hogy milyen jogintézményeket nevez meg a Ptk. a szerződés megerősítésére!",
+    options:[
+      "Jogvesztés kikötése",
+      "Kezesség",
+      "Foglaló",
+      "Kötbér",
+      "Előleg"
+    ],
+    correct:[0,2,3]
+  },
+  {
+    id:"kotel-mc-021",
+    type:"mcq",
+    multi:false,
+    topic:"Foglaló",
+    text:"Jelölje meg, hogy milyen formában adható a foglaló!",
+    options:[
+      "Dolog",
+      "Jog",
+      "Pénz"
+    ],
+    correct:[2]
+  },
+  {
+    id:"kotel-mc-022",
+    type:"mcq",
+    multi:true,
+    topic:"Foglaló",
+    text:"Jelölje meg, hogy melyik vagy melyek igazak a foglalóra!",
+    options:[
+      "A kötelezettségvállalás megerősítését szolgálja",
+      "A bíróság mérsékelheti a foglaló összegét",
+      "Kötelező írásban rögzíteni",
+      "Az írásbeliség nem kötelező",
+      "Mértékét a Ptk. nem határozza meg"
+    ],
+    correct:[0,1,3,4]
+  },
+  {
+    id:"kotel-mc-023",
+    type:"mcq",
+    multi:true,
+    topic:"Kellékszavatosság",
+    text:"Jelölje meg, hogy a kellékszavatossági igény alapján a jogosult mit tehet, illetve mit igényelhet!",
+    options:[
+      "Kijavítást kérhet",
+      "Kicserélést kérhet",
+      "Arányos árleszállítást kérhet",
+      "A szerződéstől elállhat"
+    ],
+    correct:[0,1,2,3]
+  },
+  {
+    id:"kotel-mc-024",
+    type:"mcq",
+    multi:true,
+    topic:"Tulajdonátruházó szerződések",
+    text:"Jelölje meg, hogy melyek tartoznak a tulajdonátruházó szerződések közé!",
+    options:[
+      "Adásvételi szerződés",
+      "Bizományosi szerződés",
+      "Csere szerződés",
+      "Ajándékozási szerződés"
+    ],
+    correct:[0,2,3]
+  },
+  {
+    id:"kotel-mc-025",
+    type:"mcq",
+    multi:true,
+    topic:"Szerződésszegés",
+    text:"Jelölje meg a szerződésszegés eseteit!",
+    options:[
+      "A kötelezett késedelme",
+      "A jogosult átvételi késedelme",
+      "Hibás teljesítés",
+      "A teljesítés megtagadása",
+      "A teljesítés lehetetlenné válása"
+    ],
+    correct:[0,1,2,3,4]
+  }
+);
+QUESTION_BANK.push(
+  // ----------- 1–10: Polgári jog – személyek -----------
+  { id:"pj-tf-001", type:"mcq", multi:false, topic:"Polgári jog", text:"A jogképesség a fogamzással kezdődik, ha a gyermek élve születik.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-tf-002", type:"mcq", multi:false, topic:"Polgári jog", text:"A cselekvőképesség kizárólag bírósági ítélettel korlátozható.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-tf-003", type:"mcq", multi:false, topic:"Polgári jog", text:"A kiskorú 14 éves kor alatt korlátozottan cselekvőképes.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"pj-tf-004", type:"mcq", multi:false, topic:"Polgári jog", text:"A cselekvőképtelen személy érvényes jognyilatkozatot tehet saját maga.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"pj-tf-005", type:"mcq", multi:false, topic:"Polgári jog", text:"A cselekvőképesség részleges korlátozását a bíróság meghatározott ügycsoportokra rendelheti el.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-006", type:"mcq", multi:true, topic:"Polgári jog", text:"Ki lehet gondnokolt?", options:["Cselekvőképtelen személy","Korlátozottan cselekvőképes személy","Nagykorú, akinek ügyeit nem tudja intézni","Minden kiskorú"], correct:[0,1,2] },
+  { id:"pj-mc-007", type:"mcq", multi:false, topic:"Polgári jog", text:"A jogképesség:", options:["A születéstől a halálig tart","Csak cselekvőképes személyt illet meg","Csak magyar állampolgárokat illet meg","Nem szűnik meg a halállal"], correct:[0] },
+  { id:"pj-tf-008", type:"mcq", multi:false, topic:"Polgári jog", text:"A holtnak nyilvánítás bírósági eljárásban történik.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-tf-009", type:"mcq", multi:false, topic:"Polgári jog", text:"A jogi személynek nincs jogképessége.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"pj-mc-010", type:"mcq", multi:true, topic:"Polgári jog", text:"A jogi személy:", options:["Jogképes","Saját nevében jogokat szerezhet","Saját kötelezettségeiért maga felel","Nem perelhető"], correct:[0,1,2] },
+
+  // ----------- 11–20: Kötelmi jog általános -----------
+  { id:"kot-tf-011", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A kötelem kötelezett és jogosult közötti jogviszony.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kot-tf-012", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A szolgáltatás lehet egyszeri vagy tartós.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kot-tf-013", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A teljesítés helyét a törvény soha nem szabályozza, mindig a felek határozzák meg.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kot-mc-014", type:"mcq", multi:true, topic:"Kötelmi jog", text:"A kötelmek keletkezhetnek:", options:["Szerződésből","Jogszabályból","Bírósági határozatból","Deliktumból (jogellenes károkozás)"], correct:[0,1,2,3] },
+  { id:"kot-mc-015", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A teljesítés ideje:", options:["Mindig a szerződésben van meghatározva","Jogszabály is rögzítheti","Nincs jelentősége","Mindig a jogosult dönti el"], correct:[1] },
+  { id:"kot-tf-016", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A pénztartozás teljesítésének időpontja a jogosult bankszámláján való jóváírás.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kot-mc-017", type:"mcq", multi:true, topic:"Kötelmi jog", text:"A szerződés érvénytelenségének okai lehetnek:", options:["Alakiság hiánya","Tilalmazott jogügylet","Lehetetlen szolgáltatás","Fenyegetés"], correct:[0,1,2,3] },
+  { id:"kot-tf-018", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A semmisség orvosolható utólagos megerősítéssel.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kot-tf-019", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A megtámadhatóság csak határidőn belül érvényesíthető.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kot-mc-020", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A szerződés módosítása:", options:["Csak közös megegyezéssel lehetséges","A felek egyoldalúan megváltoztathatják","A jogosult egyoldalúan módosíthatja","A kötelezett módosítja írásban"], correct:[0] },
+
+  // ----------- 21–30: Kártérítés -----------
+  { id:"kar-tf-021", type:"mcq", multi:false, topic:"Kártérítés", text:"A kártérítés feltétele a jogellenes magatartás.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kar-tf-022", type:"mcq", multi:false, topic:"Kártérítés", text:"A károsultnak mindig bizonyítania kell a felróhatóságot.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kar-tf-023", type:"mcq", multi:false, topic:"Kártérítés", text:"A károkozó vétkessége mindig szükséges a felelősséghez.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kar-mc-024", type:"mcq", multi:true, topic:"Kártérítés", text:"A felelősség feltételei:", options:["Kár","Okozati összefüggés","Felróhatóság","Jogellenesség"], correct:[0,1,3] },
+  { id:"kar-mc-025", type:"mcq", multi:false, topic:"Kártérítés", text:"Az objektív felelősség:", options:["Felróhatóságtól független","Csak szándékosságnál áll fenn","Csak szerződésszegésre vonatkozik","A károsult bizonyítja"], correct:[0] },
+  { id:"kar-tf-026", type:"mcq", multi:false, topic:"Kártérítés", text:"Előreláthatósági korlát érvényesül a kártérítés összegénél.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kar-mc-027", type:"mcq", multi:true, topic:"Kártérítés", text:"Melyek minősülnek kárnak?", options:["Elmaradt haszon","Költségnövekedés","Pszichés hátrány","Értékcsökkenés"], correct:[0,1,3] },
+  { id:"kar-tf-028", type:"mcq", multi:false, topic:"Kártérítés", text:"A károsult köteles a kárenyhítésre.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kar-tf-029", type:"mcq", multi:false, topic:"Kártérítés", text:"A károkozó mindig teljes kárt térít.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kar-mc-030", type:"mcq", multi:false, topic:"Kártérítés", text:"A sérelemdíj:", options:["Vagyoni kár kompenzálására szolgál","Személyiségi jogsértés esetén járhat","Mindig pénzben jár","Tárgyi kár esetén jár"], correct:[1] },
+
+  // ----------- 31–40: Csődeljárás – felszámolás -----------
+  { id:"csod-tf-031", type:"mcq", multi:false, topic:"Csődeljárás", text:"A csődeljárás célja a fizetőképesség helyreállítása.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-tf-032", type:"mcq", multi:false, topic:"Csődeljárás", text:"A csődegyezség csak a hitelezők hozzájárulásával jöhet létre.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-mc-033", type:"mcq", multi:false, topic:"Csődeljárás", text:"A felszámolás célja:", options:["A vállalat reorganizációja","A vállalat megszüntetése","A vállalat eladása","A működés folytatása"], correct:[1] },
+  { id:"csod-mc-034", type:"mcq", multi:true, topic:"Csődeljárás", text:"A fizetésképtelenség esetei:", options:["A vállalkozás 60 napon túl nem fizet","Végrehajtás eredménytelen","Nem képes tartozásait kiegyenlíteni","Csak szándékosság esetén"], correct:[0,1,2] },
+  { id:"csod-tf-035", type:"mcq", multi:false, topic:"Csődeljárás", text:"A vagyonfelügyelőt a bíróság nevezi ki.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-tf-036", type:"mcq", multi:false, topic:"Csődeljárás", text:"A felszámolási eljárás mindig csődeljárást előz meg.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"csod-mc-037", type:"mcq", multi:true, topic:"Csődeljárás", text:"A hitelezők kielégítési sorrendje tartalmazza:", options:["Felszámolási költségek","Munkabérek","Környezetvédelmi kötelezettségek","Általános hitelezők"], correct:[0,1,2,3] },
+  { id:"csod-tf-038", type:"mcq", multi:false, topic:"Csődeljárás", text:"A felszámoló feladata a vagyon értékesítése.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-tf-039", type:"mcq", multi:false, topic:"Csődeljárás", text:"A csődeljárás során fizetési haladék (moratórium) vehető igénybe.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-mc-040", type:"mcq", multi:false, topic:"Csődeljárás", text:"A felszámolási eljárást ki kezdeményezheti?", options:["Az adós","A hitelező","A bíróság hivatalból","A NAV"], correct:[1] },
+
+  // ----------- 41–50: Munkajog -----------
+  { id:"mj-tf-041", type:"mcq", multi:false, topic:"Munkajog", text:"A munkaszerződés kötelező eleme a munkabér.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-tf-042", type:"mcq", multi:false, topic:"Munkajog", text:"A munkaviszony főszabály szerint határozatlan időre jön létre.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-043", type:"mcq", multi:false, topic:"Munkajog", text:"A munkáltató utasítási joga:", options:["Korlátlan","Jogszabályok korlátozzák","A munkavállaló dönt róla","Csak írásban érvényes"], correct:[1] },
+  { id:"mj-tf-044", type:"mcq", multi:false, topic:"Munkajog", text:"A próbaidő legfeljebb 6 hónap lehet.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-045", type:"mcq", multi:true, topic:"Munkajog", text:"A munkaviszony megszűnése lehet:", options:["Felmondás","Közös megegyezés","Azonnali hatályú megszüntetés","Munkáltató döntése egyoldalúan indok nélkül"], correct:[0,1,2] },
+  { id:"mj-tf-046", type:"mcq", multi:false, topic:"Munkajog", text:"A szabadság mértéke életkorral nő.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-tf-047", type:"mcq", multi:false, topic:"Munkajog", text:"Várandós munkavállaló rendes felmondással elküldhető.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"mj-mc-048", type:"mcq", multi:true, topic:"Munkajog", text:"A munkáltató köteles biztosítani:", options:["Biztonságos munkakörnyezetet","Munkavédelmi oktatást","Védőeszközöket","Lakhatást"], correct:[0,1,2] },
+  { id:"mj-tf-049", type:"mcq", multi:false, topic:"Munkajog", text:"A túlóra évente korlátozva van.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-050", type:"mcq", multi:false, topic:"Munkajog", text:"A munkabér kifizetése:", options:["Havonta egyszer történik","Hetente esedékes","Naponta jár","Csak készpénzben lehet"], correct:[0] }
+);
+QUESTION_BANK.push(
+  // ----------- 51–60: Kötelmi jog különös rész -----------
+  { id:"kotkul-tf-051", type:"mcq", multi:false, topic:"Kötelmi különös", text:"Az adásvételi szerződés lényeges eleme a vételár.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kotkul-tf-052", type:"mcq", multi:false, topic:"Kötelmi különös", text:"A vállalkozási szerződés célja mindig egy eredmény létrehozása.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kotkul-mc-053", type:"mcq", multi:false, topic:"Kötelmi különös", text:"A megbízási szerződés:", options:["Eredménykötelem","Gondossági kötelem","Csak írásban érvényes","Mindig ingyenes"], correct:[1] },
+  { id:"kotkul-mc-054", type:"mcq", multi:true, topic:"Kötelmi különös", text:"Az adásvételnél a kellékszavatosság kiterjed:", options:["Rejtett hibákra","Nyílt hibákra","Elmaradt haszonra","A dolog rendeltetésszerű használhatóságára"], correct:[0,1,3] },
+  { id:"kotkul-tf-055", type:"mcq", multi:false, topic:"Kötelmi különös", text:"A bérleti szerződésben a bérlő használatra jogosult.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kotkul-tf-056", type:"mcq", multi:false, topic:"Kötelmi különös", text:"A bérbeadó köteles a dolog fenntartásáról gondoskodni.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kotkul-mc-057", type:"mcq", multi:false, topic:"Kötelmi különös", text:"Haszonbérlet esetén a bérlő:", options:["Használhatja a dolgot","Hasznait szedheti","Csak javítania kell","Nem felel az értékmegóvásért"], correct:[1] },
+  { id:"kotkul-tf-058", type:"mcq", multi:false, topic:"Kötelmi különös", text:"A letéteményes köteles a dolgot sajátjaként használni.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kotkul-mc-059", type:"mcq", multi:true, topic:"Kötelmi különös", text:"A fuvarozási szerződésben a fuvarozó felelős:", options:["A küldemény épségéért","A szállítási határidőért","A kárveszélyért a feladásig","A csomagolásért"], correct:[0,1] },
+  { id:"kotkul-tf-060", type:"mcq", multi:false, topic:"Kötelmi különös", text:"A biztosítási szerződés mindig kötelező.", options:["Igaz","Hamis"], correct:[1] },
+
+  // ----------- 61–70: Polgári jog – érvénytelenség, megtámadás -----------
+  { id:"pj-tf-061", type:"mcq", multi:false, topic:"Polgári jog", text:"A tévedés megtámadási ok lehet.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-tf-062", type:"mcq", multi:false, topic:"Polgári jog", text:"A jognyilatkozat csak írásban érvényes.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"pj-mc-063", type:"mcq", multi:true, topic:"Polgári jog", text:"Melyek semmisségi okok?", options:["Alakiság hiánya","Lehetetlen szolgáltatás","Tévedés","Tilalmazott ügylet"], correct:[0,1,3] },
+  { id:"pj-mc-064", type:"mcq", multi:false, topic:"Polgári jog", text:"A megtámadás határideje:", options:["1 év","3 év","5 év","Nincs határidő"], correct:[0] },
+  { id:"pj-tf-065", type:"mcq", multi:false, topic:"Polgári jog", text:"A túlzott mértékű szolgáltatás-megtérítés aránytalansága uzsorás szerződéssé teheti az ügyletet.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-tf-066", type:"mcq", multi:false, topic:"Polgári jog", text:"A jóerkölcsbe ütköző szerződés érvényes.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"pj-mc-067", type:"mcq", multi:true, topic:"Polgári jog", text:"A szerződés létrejön:", options:["Ajánlat","Elfogadás","Hallgatás esetén mindig","Ráutaló magatartással"], correct:[0,1,3] },
+  { id:"pj-tf-068", type:"mcq", multi:false, topic:"Polgári jog", text:"A fogyasztói szerződésekben az egyoldalú tisztességtelen kikötések semmisek.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-069", type:"mcq", multi:false, topic:"Polgári jog", text:"A felróhatóság fogalma:", options:["Társadalmi mércéhez igazodó gondosság elmulasztása","Mindig szándékosságot feltételez","Csak jogi személyeknél releváns","A kár bekövetkezésének bizonyítása"], correct:[0] },
+  { id:"pj-tf-070", type:"mcq", multi:false, topic:"Polgári jog", text:"A ráutaló magatartás érvényes jognyilatkozatot eredményezhet.", options:["Igaz","Hamis"], correct:[0] },
+
+  // ----------- 71–80: Munkajog – munkaszerződés, jogok & kötelezettségek -----------
+  { id:"mj-tf-071", type:"mcq", multi:false, topic:"Munkajog", text:"A munkakör a munkaszerződés kötelező eleme.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-tf-072", type:"mcq", multi:false, topic:"Munkajog", text:"A munkáltató nem változtathatja meg egyoldalúan a munkakört.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-073", type:"mcq", multi:true, topic:"Munkajog", text:"A munkavállaló alapvető kötelezettségei:", options:["Pontosság","Utasítások betartása","Titoktartás","Munkáltató utasításainak megtagadása"], correct:[0,1,2] },
+  { id:"mj-tf-074", type:"mcq", multi:false, topic:"Munkajog", text:"A munkabért utólag kell fizetni.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-075", type:"mcq", multi:false, topic:"Munkajog", text:"A rendes felmondás esetén felmondási idő:", options:["Min. 30 nap","Min. 15 nap","Mindig 60 nap","Nincs felmondási idő"], correct:[0] },
+  { id:"mj-tf-076", type:"mcq", multi:false, topic:"Munkajog", text:"Védett korú munkavállaló felmondása korlátozott.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-077", type:"mcq", multi:true, topic:"Munkajog", text:"A munkáltató ellenőrizheti:", options:["Munkavégzés módját","E-mail fiókot korlátlanul","Munkaterületen tartózkodást","Munkavédelmi előírásokat"], correct:[0,2,3] },
+  { id:"mj-tf-078", type:"mcq", multi:false, topic:"Munkajog", text:"A magáncélú internethasználat a munkahelyen minden körülmény között tilos.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"mj-mc-079", type:"mcq", multi:false, topic:"Munkajog", text:"A munkaviszony azonnali hatállyal megszüntethető:", options:["Súlyos kötelezettségszegés miatt","Határidő lejárta miatt","Indoklás nélkül mindig","Fegyelmi hiba miatt"], correct:[0] },
+  { id:"mj-tf-080", type:"mcq", multi:false, topic:"Munkajog", text:"A munkavállalót védi az egyenlő bánásmód követelménye.", options:["Igaz","Hamis"], correct:[0] },
+
+  // ----------- 81–90: Csődeljárás & felszámolás haladó -----------
+  { id:"csod-mc-081", type:"mcq", multi:true, topic:"Csődeljárás", text:"A vagyonfelügyelő feladata:", options:["A fizetési haladék felügyelete","A vagyon megóvása","Csődegyezség előkészítése","A társaság vezetése"], correct:[0,1,2] },
+  { id:"csod-tf-082", type:"mcq", multi:false, topic:"Csődeljárás", text:"A csődeljárás alatt az adós nem indíthat új szerződéseket.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"csod-tf-083", type:"mcq", multi:false, topic:"Csődeljárás", text:"A felszámolási eljárás célja a fizetőképesség helyreállítása.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"csod-mc-084", type:"mcq", multi:true, topic:"Csődeljárás", text:"A felszámoló jogosult:", options:["Vagyont értékesíteni","Követeléseket behajtani","Szerződéseket megszüntetni","Büntetést kiszabni"], correct:[0,1,2] },
+  { id:"csod-tf-085", type:"mcq", multi:false, topic:"Csődeljárás", text:"A hitelezői választmány kötelező minden eljárásban.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"csod-mc-086", type:"mcq", multi:false, topic:"Csődeljárás", text:"A csődegyezség akkor jön létre, ha:", options:["A hitelezők többsége elfogadja","A bíróság jóváhagyja","Az adós kéri","A NAV jóváhagyja"], correct:[0] },
+  { id:"csod-tf-087", type:"mcq", multi:false, topic:"Csődeljárás", text:"A felszámolás során a munkavállalók munkabére első helyen kerül kielégítésre.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-mc-088", type:"mcq", multi:true, topic:"Csődeljárás", text:"Fizetésképtelenségi ok lehet:", options:["Behajthatatlan követelés","60 napon túli nem fizetés","Eredménytelen végrehajtás","Negatív tőke"], correct:[1,2] },
+  { id:"csod-tf-089", type:"mcq", multi:false, topic:"Csődeljárás", text:"Az adós vezetői a felszámolás alatt is teljes döntési jogkörrel rendelkeznek.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"csod-tf-090", type:"mcq", multi:false, topic:"Csődeljárás", text:"A felszámolási eljárásban a bíróság kijelöli a felszámolót.", options:["Igaz","Hamis"], correct:[0] },
+
+  // ----------- 91–100: Polgári jog személyiségi jogok -----------
+  { id:"pj-tf-091", type:"mcq", multi:false, topic:"Polgári jog", text:"A személyiségi jogok mindenkit megilletnek.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-092", type:"mcq", multi:true, topic:"Polgári jog", text:"Melyek személyiségi jogok?", options:["Névviseléshez való jog","Képmáshoz való jog","Becsület és jóhírnév védelme","Elővásárlási jog"], correct:[0,1,2] },
+  { id:"pj-tf-093", type:"mcq", multi:false, topic:"Polgári jog", text:"Képmás csak az érintett hozzájárulásával készíthető vagy használható fel.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-tf-094", type:"mcq", multi:false, topic:"Polgári jog", text:"A magánszféra megsértése személyiségi jogi jogsértés.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-095", type:"mcq", multi:false, topic:"Polgári jog", text:"A sérelemdíj lényege:", options:["Vagyoni kár kompenzálása","Nem vagyoni sérelem megtérítése","Büntető jellegű","A károkozó szándékosságát feltételezi"], correct:[1] },
+  { id:"pj-tf-096", type:"mcq", multi:false, topic:"Polgári jog", text:"A jóhírnév megsértése valótlan tény állításával is megvalósulhat.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-tf-097", type:"mcq", multi:false, topic:"Polgári jog", text:"A becsület csorbítása csak szóban történhet.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"pj-mc-098", type:"mcq", multi:true, topic:"Polgári jog", text:"Milyen jogkövetkezményei lehetnek a személyiségi jogsértésnek?", options:["Eltiltás a jogsértéstől","Kártérítés","Sérelemdíj","Büntetőjogi felelősség automatikusan"], correct:[0,1,2] },
+  { id:"pj-tf-099", type:"mcq", multi:false, topic:"Polgári jog", text:"A magántitok védelme alapvető személyiségi jog.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-100", type:"mcq", multi:false, topic:"Polgári jog", text:"A jóhírnév sérelme akkor áll fenn, ha:", options:["Valótlan tényt állítanak","Valós tényt hamis színben tüntetnek fel","Véleményt mondanak negatív formában","Név nélkül tesznek közzé információt"], correct:[1] }
+);
+QUESTION_BANK.push(
+  // ----------- 101–110: Kötelmi jog – szerződésszegés, teljesítés -----------
+  { id:"kot-tf-101", type:"mcq", multi:false, topic:"Kötelmi jog", text:"Szerződésszegésnek minősül a teljesítés megtagadása.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kot-tf-102", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A kötelezett késedelme esetén a jogosult késedelmi kamatot is követelhet.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kot-mc-103", type:"mcq", multi:true, topic:"Kötelmi jog", text:"Melyek szerződésszegési alakzatok a Ptk. szerint?", options:["Kötelezett késedelme","Lehetetlenülés","Hibás teljesítés","Jogosulti késedelem"], correct:[0,2,3] },
+  { id:"kot-mc-104", type:"mcq", multi:false, topic:"Kötelmi jog", text:"Jogosulti késedelem esetén:", options:["A kötelezett kártérítéssel tartozik","A kötelezett mentesülhet a felelősség alól","A szerződés automatikusan megszűnik","A kötelezett nem követelheti költségei megtérítését"], correct:[1] },
+  { id:"kot-tf-105", type:"mcq", multi:false, topic:"Kötelmi jog", text:"Hibás teljesítésnél a jogosult elsődlegesen kijavítást vagy kicserélést követelhet.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kot-mc-106", type:"mcq", multi:true, topic:"Kötelmi jog", text:"Mely jogkövetkezmények kapcsolódhatnak hibás teljesítéshez?", options:["Kijavítás","Árleszállítás","Elállás","Kártérítés"], correct:[0,1,2,3] },
+  { id:"kot-tf-107", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A teljesítés helye főszabály szerint a kötelezett lakóhelye vagy székhelye.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kot-mc-108", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A pénztartozás teljesítésének pénzneme:", options:["Mindig forint","A felek megállapodása szerint lehet más is","Csak euró lehet","Jogszabálytól független"], correct:[1] },
+  { id:"kot-tf-109", type:"mcq", multi:false, topic:"Kötelmi jog", text:"Több kötelezett egyetemleges kötelezettsége esetén a jogosult bármelyiktől követelheti a teljesítést.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kot-mc-110", type:"mcq", multi:true, topic:"Kötelmi jog", text:"Mikor szűnhet meg a kötelem?", options:["Teljesítés","Egyezség","Beszámítás","Jogosulti késedelem automatikusan"], correct:[0,1,2] },
+
+  // ----------- 111–120: Kártérítés – veszélyes üzem, felelősségkorlátozás -----------
+  { id:"kar-tf-111", type:"mcq", multi:false, topic:"Kártérítés", text:"Veszélyes üzemi felelősségnél a károkozó csak akkor mentesül, ha a kárt elháríthatatlan ok idézte elő, amely a működés körén kívül esik.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kar-mc-112", type:"mcq", multi:true, topic:"Kártérítés", text:"Mely esetekben zárható ki vagy korlátozható a szerződéses felelősség?", options:["Ha a kárt szándékosan okozták","Ha a kárt súlyos gondatlansággal okozták","Ha a korlátozásról a felek megállapodnak","Ha fogyasztói szerződésről van szó"], correct:[2] },
+  { id:"kar-tf-113", type:"mcq", multi:false, topic:"Kártérítés", text:"Fogyasztói szerződésben a szándékos károkozásért való felelősség érvényesen nem zárható ki.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kar-mc-114", type:"mcq", multi:true, topic:"Kártérítés", text:"A károkozás jogellenességét kizáró ok lehet:", options:["Jogos védelem","Szükséghelyzet","Jogos magánérdek védelme arányosan","Károsult tájékozatlansága"], correct:[0,1,2] },
+  { id:"kar-tf-115", type:"mcq", multi:false, topic:"Kártérítés", text:"A károsult közrehatása a kárban a kártérítés összegének csökkentéséhez vezethet.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kar-mc-116", type:"mcq", multi:false, topic:"Kártérítés", text:"A veszélyes üzemi felelősség körébe tartozik különösen:", options:["Közúti gépjármű üzemeltetése","Lakás bérbeadása","Háziállat tartása","Banki átutalás"], correct:[0] },
+  { id:"kar-tf-117", type:"mcq", multi:false, topic:"Kártérítés", text:"A munkáltató vétkességtől függetlenül felel a munkavállaló munkaviszonnyal összefüggésben okozott káráért.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kar-mc-118", type:"mcq", multi:true, topic:"Kártérítés", text:"A munkavállaló kártérítési felelőssége:", options:["Főszabály szerint vétkességi jellegű","Szándékos károkozásnál teljes kártérítéssel jár","Gondatlanság esetén korlátozott összegű lehet","Mindig objektív"], correct:[0,1,2] },
+  { id:"kar-tf-119", type:"mcq", multi:false, topic:"Kártérítés", text:"A sérelemdíjhoz nem szükséges konkrét vagyoni kárt bizonyítani.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kar-mc-120", type:"mcq", multi:false, topic:"Kártérítés", text:"A kármegosztás azt jelenti, hogy:", options:["Több károkozó között oszlik meg a felelősség","A károsult és a károkozó között arányosan oszlik meg a kár","Az állam is részt vállal a kárból","A kárt több biztosító fizeti"], correct:[1] },
+
+  // ----------- 121–130: Kötelmi különös – adásvétel, vállalkozás, megbízás, bérlet -----------
+  { id:"kotkul-tf-121", type:"mcq", multi:false, topic:"Kötelmi különös", text:"Az adásvételi szerződésnél a tulajdonjog főszabály szerint az átadáskor száll át.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kotkul-mc-122", type:"mcq", multi:true, topic:"Kötelmi különös", text:"Adásvételnél a kellékszavatossági igények érvényesítésekor a jogosult:", options:["Kérhet kijavítást","Kérhet kicserélést","Kérhet árleszállítást","Nem állhat el a szerződéstől"], correct:[0,1,2] },
+  { id:"kotkul-tf-123", type:"mcq", multi:false, topic:"Kötelmi különös", text:"Az elővásárlási jog alapján a jogosult harmadik személlyel azonos feltételekkel szerződhet.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kotkul-mc-124", type:"mcq", multi:false, topic:"Kötelmi különös", text:"A vállalkozási szerződésben a vállalkozó fő kötelezettsége:", options:["A gondos eljárás","Az eredmény (mű) létrehozása","Az eszközök átadása","A munkabér fizetése"], correct:[1] },
+  { id:"kotkul-tf-125", type:"mcq", multi:false, topic:"Kötelmi különös", text:"Megbízási szerződésnél a megbízott saját nevében, de a megbízó javára jár el.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kotkul-mc-126", type:"mcq", multi:true, topic:"Kötelmi különös", text:"A megbízási szerződésre jellemző:", options:["Gondossági kötelem","A megbízott a megbízó utasításait követi","Díjazás nélkül nem lehet érvényes","A megbízott köteles elszámolni"], correct:[0,1,3] },
+  { id:"kotkul-tf-127", type:"mcq", multi:false, topic:"Kötelmi különös", text:"Bérleti szerződés esetén a bérlő köteles a bérleti díjat fizetni és a dolgot rendeltetésszerűen használni.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kotkul-mc-128", type:"mcq", multi:false, topic:"Kötelmi különös", text:"A haszonkölcsön szerződés:", options:["Ingyenes használatba adás","Visszterhes használatba adás","Tulajdonátruházással jár","Mindig pénzre irányul"], correct:[0] },
+  { id:"kotkul-tf-129", type:"mcq", multi:false, topic:"Kötelmi különös", text:"Az ajándékozási szerződés egyoldalúan visszavonható bármikor.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kotkul-mc-130", type:"mcq", multi:true, topic:"Kötelmi különös", text:"Mikor követelhető vissza az ajándék?", options:["Ajándékozó létfenntartása veszélybe kerül","Ajándékozott súlyos jogsértést követ el","Téves feltevés miatt adták","Az ajándék elromlott"], correct:[0,1,2] },
+
+  // ----------- 131–140: Munkajog – munkaidő, pihenőidő, felelősség -----------
+  { id:"mj-tf-131", type:"mcq", multi:false, topic:"Munkajog", text:"A teljes munkaidő általános mértéke napi 8 óra.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-132", type:"mcq", multi:true, topic:"Munkajog", text:"Melyek minősülnek rendkívüli munkavégzésnek (túlóra)?", options:["Munkaidő-beosztástól eltérő munka","Munkaidőkereten felüli munka","Ügyelet","Minden munkavégzés hétvégén"], correct:[0,1] },
+  { id:"mj-tf-133", type:"mcq", multi:false, topic:"Munkajog", text:"Napi 6 órát meghaladó beosztás esetén munkaközi szünetet kell biztosítani.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-134", type:"mcq", multi:false, topic:"Munkajog", text:"A heti pihenőidő főszabály szerint:", options:["Legalább 24 óra","Legalább 40 óra","Legalább 48 óra egybefüggően","Nincs törvényi minimum"], correct:[2] },
+  { id:"mj-tf-135", type:"mcq", multi:false, topic:"Munkajog", text:"A munkavállaló az okozott kárért főszabály szerint legfeljebb 4 havi távolléti díja erejéig felel gondatlan károkozás esetén.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-136", type:"mcq", multi:true, topic:"Munkajog", text:"Melyek a munkaviszonyból eredő munkáltatói kötelezettségek?", options:["Foglalkoztatási kötelezettség","Munkabér fizetése","Munkavédelem biztosítása","A munkavállaló lakhatásának biztosítása"], correct:[0,1,2] },
+  { id:"mj-tf-137", type:"mcq", multi:false, topic:"Munkajog", text:"A munkavállaló kártérítési felelőssége korlátlan, ha szándékosan okozza a kárt.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-138", type:"mcq", multi:false, topic:"Munkajog", text:"A munkaidőkeret lényege:", options:["A munkáltató hosszabb időszakra átlagosan oszthatja be a munkaidőt","A munkavállaló dönt a beosztásról","Csak napi munkaidőre vonatkozik","Túlóra nem rendelhető el"], correct:[0] },
+  { id:"mj-tf-139", type:"mcq", multi:false, topic:"Munkajog", text:"A szülési szabadság ideje alatt a munkaviszony fennmarad.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-140", type:"mcq", multi:true, topic:"Munkajog", text:"Mely esetekben illeti meg végkielégítés a munkavállalót?", options:["Munkáltató felmondása esetén","A munkáltató jogutód nélküli megszűnésekor","Munkavállaló azonnali hatályú felmondása esetén a munkáltató súlyos kötelezettségszegése miatt","Közös megegyezéskor automatikusan"], correct:[0,1,2] },
+
+  // ----------- 141–150: Csődeljárás, felszámolás, jogi alapok -----------
+  { id:"csod-tf-141", type:"mcq", multi:false, topic:"Csődeljárás", text:"Csődeljárást csak az adós kezdeményezhet.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-mc-142", type:"mcq", multi:false, topic:"Csődeljárás", text:"A moratórium célja:", options:["A hitelezők azonnali kielégítése","Végrehajtások felfüggesztése és egyezségkötés elősegítése","A társaság azonnali megszüntetése","A vezetők felelősségre vonása"], correct:[1] },
+  { id:"csod-tf-143", type:"mcq", multi:false, topic:"Csődeljárás", text:"A csődeljárás elrendelését kimondó végzés közzététele után az adós cégnevéhez a „cs. a.” toldat kerül.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-mc-144", type:"mcq", multi:true, topic:"Csődeljárás", text:"A felszámolási eljárás megindításának feltétele lehet:", options:["Hitelező kérelme","Adós kérelme","Bíróság hivatalbóli eljárása törvényben meghatározott esetekben","A társaság nyereségessége"], correct:[0,1,2] },
+  { id:"csod-tf-145", type:"mcq", multi:false, topic:"Csődeljárás", text:"A felszámolás alatt az adós vezető tisztségviselője már nem dönthet önállóan a cég vagyonáról.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"jog-tf-146", type:"mcq", multi:false, topic:"Jogi alapok", text:"A jogforrás a jogszabály kibocsátóját és formáját jelenti.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"jog-mc-147", type:"mcq", multi:true, topic:"Jogi alapok", text:"Melyek jogszabályi szintek Magyarországon?", options:["Alaptörvény","Törvény","Kormányrendelet","Bírósági ítélet mint jogszabály"], correct:[0,1,2] },
+  { id:"jog-tf-148", type:"mcq", multi:false, topic:"Jogi alapok", text:"A jogviszony mindig jogok és kötelezettségek összessége.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"jog-mc-149", type:"mcq", multi:false, topic:"Jogi alapok", text:"A diszpozitív szabály azt jelenti, hogy:", options:["A felek nem térhetnek el tőle","A felek egyező akarattal eltérhetnek tőle","Mindig kógens","Csak büntetőjogban létezik"], correct:[1] },
+  { id:"jog-tf-150", type:"mcq", multi:false, topic:"Jogi alapok", text:"A kógens jogszabályi rendelkezéstől a felek nem térhetnek el érvényesen.", options:["Igaz","Hamis"], correct:[0] }
+);
+QUESTION_BANK.push(
+  // ----------- 151–160: Kötelmi jog – biztosítékok, mellékkötelezettségek -----------
+  { id:"kotbiz-tf-151", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A kezesség járulékos kötelezettség.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kotbiz-mc-152", type:"mcq", multi:true, topic:"Kötelmi jog", text:"A kezes kötelezettsége kiterjedhet:", options:["Kamatra","Főkövetelésre","Költségekre","Bármely más harmadik fél tartozására"], correct:[0,1,2] },
+  { id:"kotbiz-tf-153", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A zálogjog lehet kézizálog és jelzálog.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kotbiz-mc-154", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A zálogjog tárgya lehet:", options:["Csak ingatlan","Csak ingó","Ingatlan és ingó is","Csak pénz"], correct:[2] },
+  { id:"kotbiz-tf-155", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A foglaló a szerződés megerősítésére szolgál.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kotbiz-tf-156", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A bánatpénz visszalépési jogot biztosíthat.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"kotbiz-mc-157", type:"mcq", multi:true, topic:"Kötelmi jog", text:"A kötbér jogkövetkezményei lehetnek:", options:["Kártérítést helyettesíti","A jogosult további kártérítést nem követelhet, ha megállapodtak róla","Késedelmi esetekre alkalmazható","Mindig büntető jellegű"], correct:[0,1,2] },
+  { id:"kotbiz-tf-158", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A jogvesztés kikötése semmis fogyasztói szerződések esetén.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"kotbiz-mc-159", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A biztosíték célja:", options:["A szerződés biztosítása","A szerződés semmissé tétele","A jogosult védelme","A kötelezett szankcionálása"], correct:[2] },
+  { id:"kotbiz-tf-160", type:"mcq", multi:false, topic:"Kötelmi jog", text:"A mellékkötelezettségek minden szerződés tartalmi elemei.", options:["Igaz","Hamis"], correct:[1] },
+
+  // ----------- 161–170: Munkajog – felmondás, jogviszony megszűnése -----------
+  { id:"mj-tf-161", type:"mcq", multi:false, topic:"Munkajog", text:"Rendes felmondást a munkavállaló köteles indokolni.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"mj-mc-162", type:"mcq", multi:true, topic:"Munkajog", text:"A munkáltató rendes felmondását indokolnia kell, ha:", options:["Határozatlan idejű munkaviszonyt mond fel","A munkavállaló kérte","Nem köteles indokolni soha","Próbaidő alatt történik"], correct:[0] },
+  { id:"mj-tf-163", type:"mcq", multi:false, topic:"Munkajog", text:"Az azonnali hatályú felmondás feltétele súlyos szerződésszegés.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-164", type:"mcq", multi:true, topic:"Munkajog", text:"Mikor nem szüntethető meg rendes felmondással a munkaviszony?", options:["Várandósság alatt","Szülési szabadság alatt","Táppénz alatt","Ha a munkavállaló bért emel"], correct:[0,1,2] },
+  { id:"mj-tf-165", type:"mcq", multi:false, topic:"Munkajog", text:"Felmondási idő a közös megegyezésnél automatikusan jár.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"mj-mc-166", type:"mcq", multi:false, topic:"Munkajog", text:"A munkaviszony megszűnik:", options:["Halállal","Idő kifutásával határozott szerződésnél","Felmondással","Kivéve, ha nincs írásban"], correct:[0] },
+  { id:"mj-tf-167", type:"mcq", multi:false, topic:"Munkajog", text:"A végkielégítés mértéke függ a munkavállaló munkában töltött idejétől.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"mj-mc-168", type:"mcq", multi:false, topic:"Munkajog", text:"Az azonnali hatályú felmondásra a félnek:", options:["15 napos határidő áll rendelkezésére","Azonnal kell megtennie","60 napja van","1 év áll rendelkezésére"], correct:[0] },
+  { id:"mj-tf-169", type:"mcq", multi:false, topic:"Munkajog", text:"A munkavállaló köteles állásidőnél is munkát végezni.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"mj-mc-170", type:"mcq", multi:true, topic:"Munkajog", text:"A munkaviszony megszűnésének dokumentumai:", options:["Kilépő papírok","Igazolás a járulékokról","Munkaköri leírás","Elszámoló lap"], correct:[0,1,3] },
+
+  // ----------- 171–180: Polgári jog – tulajdonjog, birtok, szomszédjogok -----------
+  { id:"pj-tf-171", type:"mcq", multi:false, topic:"Polgári jog", text:"A birtokos az, aki a dolgot ténylegesen hatalmában tartja.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-172", type:"mcq", multi:true, topic:"Polgári jog", text:"A tulajdonjog részjogosítványai:", options:["Használat","Birtoklás","Rendelkezés","Hitelezés"], correct:[0,1,2] },
+  { id:"pj-tf-173", type:"mcq", multi:false, topic:"Polgári jog", text:"A birtokvédelemhez nem szükséges tulajdonjog igazolása.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-174", type:"mcq", multi:false, topic:"Polgári jog", text:"A tulajdonjog megszerzésének módjai:", options:["Elbirtoklás","Öröklés","Szerződés","Csak öröklés"], correct:[2] },
+  { id:"pj-tf-175", type:"mcq", multi:false, topic:"Polgári jog", text:"A szomszédjogi szabályok a birtokháborítás elkerülését szolgálják.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-176", type:"mcq", multi:true, topic:"Polgári jog", text:"Szomszédjogi jogsértés lehet:", options:["Túlzott zaj","Bűz terjesztése","Bevilágítás tiltása","Fűnyírás napközben"], correct:[0,1] },
+  { id:"pj-tf-177", type:"mcq", multi:false, topic:"Polgári jog", text:"A közös tulajdon megszüntethető bármely tulajdonostárs kérelmére.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-178", type:"mcq", multi:false, topic:"Polgári jog", text:"Az elbirtokláshoz szükséges idő:", options:["3 év","5 év","15 év","30 év"], correct:[2] },
+  { id:"pj-tf-179", type:"mcq", multi:false, topic:"Polgári jog", text:"A birtokháborítás ellen 1 éven belül lehet fellépni.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-180", type:"mcq", multi:true, topic:"Polgári jog", text:"Tulajdonjogot szerezhetünk:", options:["Örökléssel","Szerződéssel","Hatósági határozattal","Akaratunk ellenére automatikusan"], correct:[0,1,2] },
+
+  // ----------- 181–190: Csődjog – haladó fogalmak -----------
+  { id:"csod-tf-181", type:"mcq", multi:false, topic:"Csődeljárás", text:"A felszámoló a cégvezetést átveszi.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-mc-182", type:"mcq", multi:true, topic:"Csődeljárás", text:"A felszámoló feladatai:", options:["Vagyon felmérése","Szerződések megszüntetése","Hitelezők kielégítése","Nyomozás lefolytatása"], correct:[0,1,2] },
+  { id:"csod-tf-183", type:"mcq", multi:false, topic:"Csődeljárás", text:"A hitelezők követelésüket a bírósághoz jelentik be.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"csod-mc-184", type:"mcq", multi:false, topic:"Csődeljárás", text:"A felszámolási zárómérleg:", options:["A felszámolás végén készül","A cég vagyonát mutatja ki","A hitelezők sorrendjét tartalmazza","A cég újraindítását írja elő"], correct:[0] },
+  { id:"csod-tf-185", type:"mcq", multi:false, topic:"Csődeljárás", text:"A csődeljárás elrendelésekor automatikusan beáll a fizetési moratórium.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-mc-186", type:"mcq", multi:true, topic:"Csődeljárás", text:"Felszámolás alatt a vezető tisztségviselő köteles:", options:["Együttműködni a felszámolóval","A cég iratait átadni","Működést irányítani változatlanul","A tartozásokat saját vagyonából fedezni"], correct:[0,1] },
+  { id:"csod-tf-187", type:"mcq", multi:false, topic:"Csődeljárás", text:"A követelések bejelentési határideje a közzétételtől számított 40 nap.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-mc-188", type:"mcq", multi:false, topic:"Csődeljárás", text:"A hitelezői igények kielégítése:", options:["Sorrend alapján történik","Mindig teljes körű","A felszámoló döntése alapján változik","A vezető határozza meg"], correct:[0] },
+  { id:"csod-tf-189", type:"mcq", multi:false, topic:"Csődeljárás", text:"A felszámolási eljárás után a gazdálkodó jogutód nélkül megszűnik.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"csod-mc-190", type:"mcq", multi:true, topic:"Csődeljárás", text:"Csődeljárás szükséges lehet:", options:["Fizetésképtelenség esetén","Hitelezők védelmében","Reorganizációhoz","Üzletrész-vásárláshoz"], correct:[0,1,2] },
+
+  // ----------- 191–200: Polgári jog – öröklés, jogalap nélküli gazdagodás -----------
+  { id:"pj-tf-191", type:"mcq", multi:false, topic:"Polgári jog", text:"A törvényes öröklés rendje hiányában végrendelet irányadó.", options:["Igaz","Hamis"], correct:[1] },
+  { id:"pj-mc-192", type:"mcq", multi:true, topic:"Polgári jog", text:"A törvényes öröklés sorrendje:", options:["Leszármazók","Házastárs","Felmenők","Testvérek"], correct:[0,1,2,3] },
+  { id:"pj-tf-193", type:"mcq", multi:false, topic:"Polgári jog", text:"A kötelesrész a leszármazót, házastársat és szülőt illeti meg.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-194", type:"mcq", multi:false, topic:"Polgári jog", text:"A jogalap nélküli gazdagodás esetén:", options:["A gazdagodónak vissza kell térítenie a vagyoni előnyt","Mindig kártérítési igény keletkezik","Csak szerződésszegésnél merül fel","Nem visszakövetelhető semmi"], correct:[0] },
+  { id:"pj-tf-195", type:"mcq", multi:false, topic:"Polgári jog", text:"A végrendelet érvényességéhez mindig két tanú szükséges.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-196", type:"mcq", multi:true, topic:"Polgári jog", text:"Jogalap nélküli gazdagodás lehet:", options:["Más hibájából történő szolgáltatás","Érvénytelen szerződés alapján kapott előny","Jogszabályon alapuló juttatás","Más tévedéséből fakadó fizetés"], correct:[0,1,3] },
+  { id:"pj-tf-197", type:"mcq", multi:false, topic:"Polgári jog", text:"A hagyaték a halál pillanatában átszáll az örökösre.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-198", type:"mcq", multi:false, topic:"Polgári jog", text:"A kötelesrész mértéke:", options:["A törvényes örökrész 1/4-e","A törvényes örökrész 1/2-e","Mindig 100%","A végrendelkező döntése"], correct:[1] },
+  { id:"pj-tf-199", type:"mcq", multi:false, topic:"Polgári jog", text:"Az öröklési szerződés kétoldalú szerződés, amelyben az örökös tartásra vagy ápolásra vállal kötelezettséget.", options:["Igaz","Hamis"], correct:[0] },
+  { id:"pj-mc-200", type:"mcq", multi:true, topic:"Polgári jog", text:"Mi tartozhat a hagyatékba?", options:["Ingatlan","Kötelezettségek","Ingatlan-nyilvántartási jogok","Emléktárgyak"], correct:[0,1,2,3] }
 );
 
-QUESTION_BANK.push(
-  { id:"uzlettv-tf-001", type:"mcq", multi:false, topic:"Stratégia", text:"A stratégia hosszabb távra szól, mint az üzleti terv.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-002", type:"mcq", multi:false, topic:"Stratégia", text:"A stratégia általában 1 évre szól.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"uzlettv-tf-003", type:"mcq", multi:false, topic:"Üzleti terv", text:"Az üzleti terv jellemzően rövid-középtávra, kb. 1 évre szól.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-004", type:"mcq", multi:false, topic:"Stratégia vs. üzleti terv", text:"A stratégiai tervezés mindig rövid távú és számszerűen kifejezett.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"uzlettv-tf-005", type:"mcq", multi:false, topic:"Mesterköltségvetés", text:"A mesterköltségvetés a stratégiai tervek és a megvalósítási programok számszerűsített formája.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-mc-001", type:"mcq", multi:true, topic:"Kulcsváltozók", text:"Mely tényezők befolyásolhatják a vállalati kulcsváltozókat?", options:["Hirdetési szint","Infláció","Verseny","Dolgozói létszám"], correct:[0,1,2] },
-  { id:"uzlettv-tf-006", type:"mcq", multi:false, topic:"Költségvetés fogalma", text:"A költségvetés egy szervezet számokban kifejezett feladata a tervezett tevékenységekhez.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-007", type:"mcq", multi:false, topic:"Költségvetés szerepe", text:"A költségvetés nem alkalmas arra, hogy jelezze az eltéréseket a tervekhez képest.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"uzlettv-tf-008", type:"mcq", multi:false, topic:"Tervezési fázis", text:"A költségvetés készítésének első fázisa a tervezés.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-009", type:"mcq", multi:false, topic:"Ellenőrzési fázis", text:"A költségvetés ellenőrzési fázisa a visszacsatolás és a korrekció szakasza.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-mc-002", type:"mcq", multi:true, topic:"Költségvetés részei", text:"Mely elemek tartoznak a vállalati mesterköltségvetéshez?", options:["Értékesítési terv","Termelési terv","Beszerzési terv","Pénzforgalmi előrejelzés"], correct:[0,1,2,3] },
-  { id:"uzlettv-tf-010", type:"mcq", multi:false, topic:"Mesterköltségvetés", text:"A mesterköltségvetés több résztervből épül fel, például értékesítési, termelési és pénzügyi tervből.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-011", type:"mcq", multi:false, topic:"Dekoratőr Álma ZRt.", text:"A gyártási tervben a zárókészlet általában a következő hónap értékesítésének 60%-a.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-012", type:"mcq", multi:false, topic:"Beszerzési terv", text:"A beszerzési terv a szükséges anyagok és nyersanyagok mennyiségét és értékét tartalmazza.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-013", type:"mcq", multi:false, topic:"Személyi költségterv", text:"A személyi jellegű költségek között a közvetlen és közvetett bérek, valamint jutalékok is szerepelnek.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-014", type:"mcq", multi:false, topic:"Beruházási terv", text:"A beruházási terv szoros kapcsolatban áll a mesterköltségvetéssel, mert pénzkiadással jár.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-015", type:"mcq", multi:false, topic:"Üzemi általános költség", text:"Az üzemi általános költség terv a gyártáshoz közvetlenül kapcsolódó költségeket tartalmazza.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"uzlettv-tf-016", type:"mcq", multi:false, topic:"Vállalati általános költség", text:"A vállalati általános költségek között szerepelnek az adminisztrációs és értékesítési költségek is.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-017", type:"mcq", multi:false, topic:"Készpénzforgalmi előrejelzés", text:"A készpénzforgalmi előrejelzés a vállalat várható pénzbevételeit és kiadásait tartalmazza.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-mc-003", type:"mcq", multi:true, topic:"Finanszírozási források", text:"Milyen finanszírozási módokat tartalmazhat a költségvetés?", options:["Kölcsönfelvétel","Tőkeemelés","Befektetés értékesítése","Osztalékfizetés"], correct:[0,1,2,3] },
-  { id:"uzlettv-tf-018", type:"mcq", multi:false, topic:"Üzleti terv funkciói", text:"Az üzleti terv egyik funkciója, hogy segít a vállalat teljesítményének értékelésében.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-019", type:"mcq", multi:false, topic:"Üzleti terv célja", text:"Az üzleti terv kizárólag pénzügyi befektetők számára készül.", options:["Igaz","Hamis"], correct:[1] },
-  { id:"uzlettv-tf-020", type:"mcq", multi:false, topic:"Üzleti terv olvasói", text:"Az üzleti tervet a vállalatvezetésen kívül a hitelezők és befektetők is olvassák.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-021", type:"mcq", multi:false, topic:"Belső vs külső terv", text:"A külső használatú üzleti terv rövidebb és tömörebb, mint a belső.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-022", type:"mcq", multi:false, topic:"Üzleti terv részei", text:"Az üzleti terv tíz fő részből áll, például pénzügyi tervből, marketing tervből és mellékletekből.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-mc-004", type:"mcq", multi:true, topic:"Üzleti terv tartalma", text:"Mely részek tartoznak az üzleti terv felépítésébe?", options:["Vezetői összefoglaló","Marketing terv","Gyártási terv","Mérlegkimutatás"], correct:[0,1,2,3] },
-  { id:"uzlettv-tf-023", type:"mcq", multi:false, topic:"Vezetői összefoglaló", text:"A vezetői összefoglalót a teljes üzleti terv elkészítése után érdemes megírni.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-024", type:"mcq", multi:false, topic:"Pénzügyi terv", text:"A pénzügyi terv célja a vállalkozás tervezett pénzügyi teljesítményének bemutatása.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-mc-005", type:"mcq", multi:true, topic:"Pénzügyi terv tartalma", text:"Mely dokumentumokat tartalmazhat a pénzügyi terv?", options:["Eredménykimutatás","Cash-flow kimutatás","Mérleg","Titoktartási nyilatkozat"], correct:[0,1,2] },
-  { id:"uzlettv-tf-025", type:"mcq", multi:false, topic:"Mellékletek", text:"Az üzleti terv mellékletei között szerepelhetnek önéletrajzok és konkurenciaanalízis is.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-026", type:"mcq", multi:false, topic:"Marketing terv", text:"A marketing tervben a vállalat meghatározza, hogyan reagál a piac kihívásaira.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-027", type:"mcq", multi:false, topic:"Gyártási terv", text:"A gyártási terv tartalmazza a termelési folyamatokat és az alkalmazott eljárásokat.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-028", type:"mcq", multi:false, topic:"Szervezeti felépítés", text:"A szervezeti felépítés a vállalat irányítási és döntési struktúráját mutatja be.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-029", type:"mcq", multi:false, topic:"Tőke és struktúra", text:"A tőke struktúrája bemutatja a vállalkozás pénzügyi forrásainak összetételét.", options:["Igaz","Hamis"], correct:[0] },
-  { id:"uzlettv-tf-030", type:"mcq", multi:false, topic:"Titkos dokumentum", text:"Az üzleti terv titkos dokumentum, amely csak a vállalaton belül használható.", options:["Igaz","Hamis"], correct:[1] }
-);
-QUESTION_BANK.push(
-  // --- Tárgyi eszköz-gazdálkodás ---
-  { id:"fill-001", type:"fill", topic:"Tárgyi eszköz gazdálkodás", text:"A tárgyi eszközök értéküket fokozatosan adják át a termékeknek, ezt nevezzük _____.", correct:["amortizáció"] },
-  { id:"fill-002", type:"fill", topic:"Tárgyi eszköz gazdálkodás", text:"A tárgyi eszközök közé tartoznak az ingatlanok, gépek, berendezések és _____.", correct:["tenyészállatok"] },
-  { id:"fill-003", type:"fill", topic:"Beruházások", text:"A beruházás jövőbeni eredmény elérése érdekében történő _____ áldozatvállalás.", correct:["megelőlegezett"] },
-  { id:"fill-004", type:"fill", topic:"Beruházások", text:"A beruházások finanszírozása történhet saját forrásból, hitelből vagy _____.", correct:["lízingből"] },
-  { id:"fill-005", type:"fill", topic:"Amortizáció", text:"Az amortizáció célja, hogy a tárgyi eszközök értékcsökkenését _____ módon elszámolja.", correct:["rendszeres"] },
-  { id:"fill-006", type:"fill", topic:"Amortizáció", text:"Az időarányos amortizáció leggyakoribb típusa a _____ leírás.", correct:["lineáris"] },
-  { id:"fill-007", type:"fill", topic:"Karbantartás", text:"A _____ karbantartás célja a meghibásodások megelőzése és a berendezések állapotának megőrzése.", correct:["preventív"] },
-  { id:"fill-008", type:"fill", topic:"Kapacitásmenedzsment", text:"A kapacitásmenedzsment célja, hogy a vállalat kapacitása összhangban legyen a _____ igényekkel.", correct:["piaci"] },
-  { id:"fill-009", type:"fill", topic:"Selejtezés", text:"A selejtezés során a feleslegessé vált vagy használhatatlan eszközöket a nyilvántartásból _____.", correct:["kivezetik"] },
-  { id:"fill-010", type:"fill", topic:"Tárgyi eszköz értékelése", text:"A tárgyi eszközök könyv szerinti értéke az eszköz bruttó értéke csökkentve az _____ összegével.", correct:["értékcsökkenés"] },
-
-  // --- Vagyongazdálkodás ---
-  { id:"fill-011", type:"fill", topic:"Vagyongazdálkodás", text:"A vállalat olyan önállóan gazdálkodó szervezeti egység, amely kockázatot vállalva _____ növekedésre törekszik.", correct:["nyereség"] },
-  { id:"fill-012", type:"fill", topic:"Ipar 4.0", text:"Az ipar 4.0 alapja a digitalizáció és az _____ működés.", correct:["adatvezérelt"] },
-  { id:"fill-013", type:"fill", topic:"KKV", text:"A kis- és középvállalkozások legfeljebb _____ főt foglalkoztatnak.", correct:["249"] },
-  { id:"fill-014", type:"fill", topic:"Innováció", text:"Az innováció új termék, eljárás, piac vagy _____ létrehozását jelentheti.", correct:["szervezet"] },
-  { id:"fill-015", type:"fill", topic:"Egyéni vállalkozás", text:"Az egyéni vállalkozó a tevékenységéért _____ felelősséggel tartozik.", correct:["korlátlan"] },
-  { id:"fill-016", type:"fill", topic:"Vállalkozás bukása", text:"A legtöbb vállalkozás bukása a _____ hiányából ered.", correct:["vezetői tapasztalat"] },
-  { id:"fill-017", type:"fill", topic:"Vállalkozás vásárlása", text:"Meglévő vállalkozás vásárlásakor érdemes megvizsgálni a _____ okát.", correct:["eladás"] },
-  { id:"fill-018", type:"fill", topic:"Vállalkozás vagyona", text:"A vállalkozás eszközei és forrásai értékben mindig _____.", correct:["megegyeznek"] },
-  { id:"fill-019", type:"fill", topic:"Forgóeszközök", text:"A készletek, követelések és pénzeszközök a vállalkozás _____ körébe tartoznak.", correct:["forgóeszközei"] },
-  { id:"fill-020", type:"fill", topic:"Befektetett eszközök", text:"A befektetett eszközök hosszabb, mint _____ évet meghaladóan szolgálják a vállalat működését.", correct:["egy"] },
-
-  // --- Költséggazdálkodás – KMH elemzés ---
-  { id:"fill-021", type:"fill", topic:"Költségek", text:"A költség az árbevétel érdekében felhasznált _____ pénzben kifejezett értéke.", correct:["erőforrások"] },
-  { id:"fill-022", type:"fill", topic:"Költségnemek", text:"A költségek három fő csoportja: anyagjellegű, személyi jellegű és _____.", correct:["értékcsökkenési leírás"] },
-  { id:"fill-023", type:"fill", topic:"Fix költség", text:"A fix költség a tevékenység adott szakaszában _____ marad.", correct:["állandó"] },
-  { id:"fill-024", type:"fill", topic:"Közvetlen költség", text:"A közvetlen költségek _____ hozzárendelhetők a termékhez.", correct:["közvetlenül"] },
-  { id:"fill-025", type:"fill", topic:"Releváns költség", text:"Releváns költségnek nevezzük azokat, amelyek egy adott _____ hatására változnak.", correct:["döntés"] },
-  { id:"fill-026", type:"fill", topic:"Elsüllyedt költség", text:"Az elsüllyedt költségek már megtörténtek, és a jövőben _____ változtathatók.", correct:["nem"] },
-  { id:"fill-027", type:"fill", topic:"KMH elemzés", text:"A költség–mennyiség–haszon elemzés célja a költségek, árbevétel és _____ kapcsolatának feltárása.", correct:["nyereség"] },
-  { id:"fill-028", type:"fill", topic:"Fedezeti pont", text:"A fedezeti pont az a termelési szint, ahol a bevétel és a költség _____ egymással.", correct:["megegyezik"] },
-  { id:"fill-029", type:"fill", topic:"Fedezet", text:"A fedezet az árbevétel és a _____ költségek különbsége.", correct:["változó"] },
-  { id:"fill-030", type:"fill", topic:"Működési áttétel", text:"A működési áttétel megmutatja, hogy a fix költségek aránya hogyan hat a vállalat _____.", correct:["kockázatára"] },
-
-  // --- Üzleti terv és stratégia ---
-  { id:"fill-031", type:"fill", topic:"Stratégia", text:"A stratégia hosszú távra szóló, _____ célokat meghatározó terv.", correct:["átfogó"] },
-  { id:"fill-032", type:"fill", topic:"Üzleti terv", text:"Az üzleti terv a vállalat jövőbeli működését _____ formában mutatja be.", correct:["számszerű"] },
-  { id:"fill-033", type:"fill", topic:"Mesterköltségvetés", text:"A mesterköltségvetés több résztervből épül fel, például értékesítési, termelési és _____ tervből.", correct:["pénzügyi"] },
-  { id:"fill-034", type:"fill", topic:"Költségvetés", text:"A költségvetés egyik funkciója az _____, amely összeveti a tervet a tényleges adatokkal.", correct:["ellenőrzés"] },
-  { id:"fill-035", type:"fill", topic:"Beruházási terv", text:"A beruházási terv a vállalat jövőbeli pénzkiadásait és _____ tartalmazza.", correct:["forrásait"] },
-  { id:"fill-036", type:"fill", topic:"Pénzügyi terv", text:"A pénzügyi terv három fő dokumentuma: mérleg, eredménykimutatás és _____.", correct:["cash-flow"] },
-  { id:"fill-037", type:"fill", topic:"Marketing terv", text:"A marketing terv meghatározza, hogyan reagál a vállalat a _____ kihívásaira.", correct:["piaci"] },
-  { id:"fill-038", type:"fill", topic:"Vezetői összefoglaló", text:"A vezetői összefoglalót az üzleti terv elkészítése _____ célszerű megírni.", correct:["után"] },
-  { id:"fill-039", type:"fill", topic:"Tőkeszerkezet", text:"A tőkeszerkezet a vállalat _____ összetételét mutatja be.", correct:["forrásainak"] },
-  { id:"fill-040", type:"fill", topic:"Szervezeti felépítés", text:"A szervezeti felépítés bemutatja a vállalat _____ és döntési viszonyait.", correct:["irányítási"] }
-);
-QUESTION_BANK.push(
-  { id:"fill-041", type:"fill", topic:"Tárgyi eszközök", text:"A(z) _____ a tárgyi eszközbe be van építve, azzal össze van szerelve, nélküle rendeltetésszerűen nem használható.", correct:["alkatrész"] },
-  { id:"fill-042", type:"fill", topic:"Tárgyi eszközök", text:"Minél gyorsabb a technikai fejlődés, annál gyorsabb az eszköz _____.", correct:["avulása"] },
-  { id:"fill-043", type:"fill", topic:"Vállalat fogalma", text:"A vállalat termékek és szolgáltatások kielégítésére, profitszerzés céljából létrejött _____ entitás.", correct:["üzleti"] },
-  { id:"fill-044", type:"fill", topic:"Vállalat fogalma", text:"A vállalati dolgozók tevékenysége a társadalom _____ elégíti ki.", correct:["szükségleteit"] },
-  { id:"fill-045", type:"fill", topic:"Költségek", text:"A _____ költségek azok, amelyekről nem vagy csak nehezen állapítható meg, melyik költségviselőt terhelik.", correct:["közvetett"] },
-  { id:"fill-046", type:"fill", topic:"Költségek", text:"A lejárt költség _____ jelent.", correct:["ráfordítást"] },
-  { id:"fill-047", type:"fill", topic:"Költségek", text:"A költség és a _____ nem azonos fogalom.", correct:["kiadás"] },
-  { id:"fill-048", type:"fill", topic:"Költségek", text:"A terméket előállító dolgozó túlórapótléka lehet _____ költség.", correct:["közvetlen"] },
-  { id:"fill-049", type:"fill", topic:"Költségek", text:"A készletek bekerülési értéke lejárt költség, azaz _____.", correct:["ráfordítás"] },
-  { id:"fill-050", type:"fill", topic:"Költségek", text:"Az igazgató túlórára kapott bére mindig _____ költség.", correct:["közvetett"] }
-);
-QUESTION_BANK.push(
-  { id:"multi-001", type:"mcq", multi:false, topic:"Stratégia", text:"A stratégia általában hány évre szól?", options:["1 évre","max. 5 évre","kb. 5 évre","5–10 évre"], correct:[3] },
-  { id:"multi-002", type:"mcq", multi:false, topic:"Üzleti terv", text:"Az üzleti terv általában hány évre szól?", options:["1 évre","max. 5 évre","kb. 5 évre","5–10 évre"], correct:[1] },
-  { id:"multi-003", type:"mcq", multi:false, topic:"Vállalat", text:"Melyik jellemzi legjobban a vállalatot?", options:["Nem kockáztat","Nyereségre törekszik és kockázatot vállal","Csak állami tulajdonú lehet","Nem termel profitot"], correct:[1] },
-  { id:"multi-004", type:"mcq", multi:false, topic:"Ipar 4.0", text:"Mi jellemzi az Ipar 4.0 korszakát?", options:["Gőzgépek elterjedése","Tömeggyártás és elektromosság","Digitalizáció és adatvezérelt rendszerek","Mechanikus fonás"], correct:[2] },
-  { id:"multi-005", type:"mcq", multi:false, topic:"KKV kategóriák", text:"A KKV-k besorolása az EU szerint milyen szempontok alapján történik?", options:["Alkalmazottak száma, árbevétel, mérlegfőösszeg","Telephely mérete, adótípus, iparág","Tulajdonosok száma, részvények értéke, iparág"], correct:[0] },
-  { id:"multi-006", type:"mcq", multi:false, topic:"Vállalkozás formák", text:"Melyik állítás igaz az egyéni vállalkozóra?", options:["Korlátolt felelősségű","Korlátlan felelősségű","Részvénytársaság formában működik","Csak állami támogatással alapítható"], correct:[1] },
-  { id:"multi-007", type:"mcq", multi:false, topic:"Vállalkozás indítása", text:"Melyik előny az új vállalkozás alapításakor?", options:["Gyors profit","Kisebb kockázat","Teljes önállóság és rugalmasság","Meglévő hírnév"], correct:[2] },
-  { id:"multi-008", type:"mcq", multi:false, topic:"Üzleti terv részei", text:"Melyik NEM része az üzleti tervnek?", options:["Marketing terv","Gyártási terv","Adóbevallás","Pénzügyi terv"], correct:[2] },
-  { id:"multi-009", type:"mcq", multi:false, topic:"Mesterköltségvetés", text:"Melyik NEM a mesterköltségvetés része?", options:["Értékesítési terv","Gyártási terv","Beruházási terv","Kutatási beszámoló"], correct:[3] },
-  { id:"multi-010", type:"mcq", multi:false, topic:"Költség fogalma", text:"Melyik állítás helyes a költség fogalmáról?", options:["Mindig pénzkiadást jelent","Csak anyagköltséget tartalmaz","A bevétel érdekében felhasznált erőforrások pénzértéke","Csak a munkabért tartalmazza"], correct:[2] },
-  { id:"multi-011", type:"mcq", multi:false, topic:"Fix és változó költség", text:"Melyik jellemző igaz a fix költségre?", options:["A termelés szintjével arányosan nő","Bizonyos szakaszon állandó marad","Mindig nullára csökken","A bevétellel együtt változik"], correct:[1] },
-  { id:"multi-012", type:"mcq", multi:false, topic:"Releváns költség", text:"Mi a releváns költség?", options:["Ami a döntéstől függetlenül megmarad","Ami egy döntés hatására megváltozik","Mindig fix költség","Mindig anyagköltség"], correct:[1] },
-  { id:"multi-013", type:"mcq", multi:false, topic:"Fedezeti pont", text:"Mit jelent a fedezeti pont?", options:["Amikor az árbevétel meghaladja a költségeket","Amikor a bevétel megegyezik a költséggel","Amikor a vállalat veszteséget termel","Amikor minden költség fix"], correct:[1] },
-  { id:"multi-014", type:"mcq", multi:false, topic:"KMH elemzés", text:"Mit vizsgál a KMH elemzés?", options:["A vállalat marketingtevékenységét","A költségek, mennyiség és haszon kapcsolatát","Az amortizáció típusait","A pénzügyi kimutatások hitelességét"], correct:[1] },
-  { id:"multi-015", type:"mcq", multi:false, topic:"Költségszerkezet", text:"Melyik NEM költségnem?", options:["Anyagjellegű","Személyi jellegű","Pénzügyi","Értékcsökkenési"], correct:[2] },
-  { id:"multi-016", type:"mcq", multi:false, topic:"Költségtípus", text:"Mi a különbség a közvetlen és közvetett költség között?", options:["A közvetlen azonnal hozzárendelhető a termékhez, a közvetett nem","A közvetett mindig változó","A közvetlen mindig fix","A közvetett mindig anyagköltség"], correct:[0] },
-  { id:"multi-017", type:"mcq", multi:false, topic:"Amortizáció", text:"Melyik NEM amortizációs módszer?", options:["Lineáris","Degresszív","Progresszív","Kumulatív"], correct:[3] },
-  { id:"multi-018", type:"mcq", multi:false, topic:"Üzleti terv funkciója", text:"Mi az üzleti terv egyik fő funkciója?", options:["A vállalat szerződéseinek tárolása","A működés és tervezés koordinálása","Az éves beszámoló kiváltása","A marketingtevékenység titkosítása"], correct:[1] },
-  { id:"multi-019", type:"mcq", multi:false, topic:"Pénzügyi terv", text:"Melyik NEM tartozik a pénzügyi terv részei közé?", options:["Cash-flow","Eredménykimutatás","Mérleg","Reklámterv"], correct:[3] },
-  { id:"multi-020", type:"mcq", multi:false, topic:"Innováció", text:"Melyik NEM az innováció lehetséges iránya?", options:["Új termék vagy eljárás","Új szervezet létrehozása","Új nyersanyagforrás","Régi módszerek visszaállítása"], correct:[3] }
-);
 
 
 const QUESTIONS = QUESTION_BANK;
